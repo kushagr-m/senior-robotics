@@ -8,7 +8,7 @@ int ballZone() {
     0 = straight ahead
     -6 = 6 = behind
     */
-} 
+}
 
 int ballStrength() {
     // returns a positive value
@@ -37,13 +37,6 @@ if [ball is behind and L/R] {go back till ball is ahead, then use cond 2.}
 
 */
 
-if (ballZone() > 0) && () {
-
-}
-
-/*
-*/
-
 // we can move in 60* intervals
 
 void setup() {
@@ -51,14 +44,12 @@ void setup() {
     int iterations = 0;
 }
 
-void loop() {    
+void loop() {
 
-    if (compassValue() != compassInitial) {
-        // MAKE IT THE SAME 
-        // LOCK BOT ORIENTATION TO NORTH
+    if (compassValue() != compassInitial) { // we want to lock the bot facing forward
+        compassNow = compassValue();
     }
 
-    // IF THE BALL IS MOVING SOUTH
 
     iterations += 1;
 
