@@ -46,10 +46,13 @@ int ballMovementDir() {
 
 // end higher level functions
 
+int compassInitial;
+int previousBallZone;
+
 void setup() {
 
-  int compassInitial = getCompassValue(); // stores the initial compass value, this is the value we will lock to
-  int previousBallZone = ballZone();
+  compassInitial = getCompassValue(); // stores the initial compass value, this is the value we will lock to
+  previousBallZone = ballZone();
 
 }
 
