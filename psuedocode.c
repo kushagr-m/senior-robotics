@@ -24,6 +24,9 @@ int ballStrength() {
   // R: [0,255]
 }
 
+void botMove(degrees) {
+  // use holonomic drive with 3 wheels to move at a bearing of x degrees
+}
 
 // end low-level functions
 
