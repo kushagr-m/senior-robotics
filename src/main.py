@@ -1,7 +1,9 @@
 import cv2
 import vision
+import os
 
-video = cv2.VideoCapture(1)
+#video = cv2.VideoCapture(1)
+video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
 while(True):
@@ -14,6 +16,10 @@ while(True):
         ballCenter, ballRadius = vision.findBall(hsv)
         if ballCenter:
             cv2.circle(overlayedFrame, ballCenter, ballRadius, (0, 255, 0), 2)
+
+        goalCenter, goalDimensions = vision.findGoal(hsv)
+        if goalCenter:
+            cv2.circle(overlayedFrame, goalCenter, 5, (0, 0, 255), 5)
 
         cv2.imshow('image', overlayedFrame)
 

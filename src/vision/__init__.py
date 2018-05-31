@@ -6,6 +6,10 @@ import math
 ballLower = (0, 233, 128)
 ballUpper = (0, 255, 231)
 
+goalLower = (23, 88, 137)
+goalUpper = (51, 160, 255)
+goalRatio = 4
+
 def getFrame(video):
     (grabbed, frame) = video.read()
     if grabbed:
@@ -44,4 +48,25 @@ def findBall(hsvFrame):
 
 cv2.namedWindow('goalmask', cv2.WINDOW_NORMAL)
 def findGoal(hsvFrame):
+    mask = cv2.inRange(hsvFrame, goalLower, goalUpper)
+
+    image, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if len(contours) > 0:
+        c = max(contours, key=cv2.contourArea)
+
+        perimeter = cv2.arcLength(c, True)
+        approx = cv2.approxPolyDP(c, 0.04 * perimeter, True)
+
+        (x, y, w, h) = cv2.boundingRect(approx)
+        ratio = w / h
+        center = (int(x + w / 2), int(y + h / 2))
+
+        cv2.imshow('goalmask', mask)
+
+        if ratio > goalRatio - 0.5 and ratio < goalRatio + 0.5:
+            return center, (w, h)
+
+    return None, None
+    #cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
     

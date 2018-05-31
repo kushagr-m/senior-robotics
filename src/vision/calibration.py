@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 goalCalibration = True
 
@@ -25,7 +26,7 @@ while(True):
     (grabbed, frame) = video.read()
 
     if goalCalibration:
-        frame = cv2.imread('./../callibyellow.png')
+        frame = cv2.imread(os.path.dirname(os.path.abspath(__file__)) + '/../../callibyellow.png')
 
     if grabbed:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV) 
