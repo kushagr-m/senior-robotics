@@ -3,16 +3,12 @@ import numpy as np
 import math
 
 # Calibration
-ballLower = (0, 233, 128)
-ballUpper = (0, 255, 231)
-
-goalLower = (23, 88, 137)
-goalUpper = (51, 160, 255)
-goalRatio = 4
+from calibrationSettings import *
 
 def getFrame(video):
     (grabbed, frame) = video.read()
     if grabbed:
+        frame = cv2.resize(frame, (frameDimensions))
         return frame
     return None
 
@@ -21,6 +17,15 @@ def getHSVFrame(frame):
     hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
     return hsv
 
+"""
+findBall()
+
+Inputs:  hsvFrame - a frame in the HSV colour space
+Outputs: center   - A (x, y) tuple representing the pixel coordinate of the center of the ball
+         radius   - An integer representing the pixel radius of the ball from the center
+
+         Output is 'None, None' if a ball is not detected
+"""
 cv2.namedWindow('ballmask', cv2.WINDOW_NORMAL)
 def findBall(hsvFrame):
     mask = cv2.inRange(hsvFrame, ballLower, ballUpper)
@@ -36,7 +41,7 @@ def findBall(hsvFrame):
         center = (int(x), int(y))
         radius = int(radius)
 
-        cv2.circle(mask, center, radius, (255, 255, 255), 5)
+        cv2.circle(mask, center, radius, (255, 255, 255), 1)
         cv2.imshow('ballmask', mask)
 
         if (area / (math.pi * (radius ** 2))) > 0.75:
@@ -46,6 +51,15 @@ def findBall(hsvFrame):
     
     return None, None
 
+"""
+findGoal()
+
+Inputs:  hsvFrame   - a frame in the HSV colour space
+Outputs: center     - A (x, y) tuple representing the pixel coordinate of the center of the goal
+         dimensions - A (width, height) tuple representing the pixel size of the goal
+
+         Output is 'None, None' if a goal is not detected
+"""
 cv2.namedWindow('goalmask', cv2.WINDOW_NORMAL)
 def findGoal(hsvFrame):
     mask = cv2.inRange(hsvFrame, goalLower, goalUpper)
@@ -63,8 +77,8 @@ def findGoal(hsvFrame):
         center = (int(x + w / 2), int(y + h / 2))
 
         cv2.imshow('goalmask', mask)
-
-        if ratio > goalRatio - 0.5 and ratio < goalRatio + 0.5:
+        #print(ratio)
+        if w > goalMinSize[0] and h > goalMinSize[1] and ratio > goalWidthHeightRatio - 0.5 and ratio < goalWidthHeightRatio + 0.5:
             return center, (w, h)
 
     return None, None
