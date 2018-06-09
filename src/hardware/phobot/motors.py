@@ -6,20 +6,32 @@ from lib import *
 # +ve: clockwise
 
 def N(power = 100):
+    # set N power
     print("N(",power,")",sep='')
     return
 
 def E(power = 100):
+    # set E power
     print("E(",power,")",sep='')
     return
 
 def S(power = 100):
+    # set S power
     print("S(",power,")",sep='')
     return
 
 def W(power = 100):
+    # set W power
     print("W(",power,")",sep='')
     return
+
+def getCurrent():
+    N = 0
+    E = 0
+    S = 0
+    W = 0
+    # get current motor power from arduino and store in N,E,S,W
+    return N,E,S,W
 
 # Reset (stop all movement)
 def stop():

@@ -3,6 +3,7 @@ import vision
 import os
 
 import hardware.phobot.motors as motors
+import hardware.phobot.compass as compass
 
 from calibrationSettings import *
 
