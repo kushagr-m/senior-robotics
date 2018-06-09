@@ -10,7 +10,7 @@ video = cv2.VideoCapture(1)
 #video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
-
+# loop
 while(True):
     frame = vision.getFrame(video)
 
