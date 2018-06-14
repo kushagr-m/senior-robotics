@@ -1,9 +1,9 @@
-ballLower = (0, 147, 76)
-ballUpper = (8, 255, 179)
+ballLower = (8, 0, 222)
+ballUpper = (68, 34, 255)
 
-goalLower = (20, 59, 134)
-goalUpper = (104, 171, 255)
-goalWidthHeightRatio = 2.38
+goalLower = (5, 78, 224)
+goalUpper = (65, 138, 255)
+goalWidthHeightRatio = 0.4
 goalMinSize = (10, 4)
 
 # horz and vert size of frame

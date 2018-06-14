@@ -10,6 +10,7 @@ maxs = [0,0,0]
 video = cv2.VideoCapture(1)
 
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+cv2.namedWindow('original', cv2.WINDOW_NORMAL)
 
 def trackbarCallback(value):
     pass
@@ -24,28 +25,35 @@ cv2.createTrackbar('Hmax', 'image', 0, 255, trackbarCallback)
 cv2.createTrackbar('Smax', 'image', 0, 255, trackbarCallback)
 cv2.createTrackbar('Vmax', 'image', 0, 255, trackbarCallback)
 
-"""
-def onMouse(event, x, y, a, b):
-    (grabbed, frame) = video.read()
+cv2.setTrackbarPos('Hmin', 'image', 0)
+cv2.setTrackbarPos('Hmax', 'image', 255)
+cv2.setTrackbarPos('Smin', 'image', 0)
+cv2.setTrackbarPos('Smax', 'image', 255)
+cv2.setTrackbarPos('Vmin', 'image', 0)
+cv2.setTrackbarPos('Vmax', 'image', 255)
 
-    goalCalibration = cv2.getTrackbarPos('GoalCalibration', 'image') == 1
-    if goalCalibration:
-        frame = cv2.imread(os.path.dirname(os.path.abspath(__file__)) + '/../../callibyellow.png')
+autocalibration_tolerance = 30
+def onMouse(event, x, y, flags, params):
+    if event == cv2.EVENT_LBUTTONUP:
+        (grabbed, frame) = video.read()
 
-    frame = cv2.resize(frame, (320, 240))
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
+        goalCalibration = cv2.getTrackbarPos('GoalCalibration', 'image') == 1
+        if goalCalibration:
+            frame = cv2.imread(os.path.dirname(os.path.abspath(__file__)) + '/../../callibyellow.png')
 
-    data = hsv[x, y]
+        frame = cv2.resize(frame, (320, 240))
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
 
-    cv2.setTrackbarPos('Hmin', 'image', data[0])
-    cv2.setTrackbarPos('Hmax', 'image', data[0])
-    cv2.setTrackbarPos('Smin', 'image', data[1])
-    cv2.setTrackbarPos('Smax', 'image', data[1])
-    cv2.setTrackbarPos('Vmin', 'image', data[2])
-    cv2.setTrackbarPos('Vmax', 'image', data[2])
-cv2.SetMouseCallback('image', onMouse)
-"""
+        data = hsv[y, x]
+
+        cv2.setTrackbarPos('Hmin', 'image', data[0] - autocalibration_tolerance)
+        cv2.setTrackbarPos('Hmax', 'image', data[0] + autocalibration_tolerance)
+        cv2.setTrackbarPos('Smin', 'image', data[1] - autocalibration_tolerance)
+        cv2.setTrackbarPos('Smax', 'image', data[1] + autocalibration_tolerance)
+        cv2.setTrackbarPos('Vmin', 'image', data[2] - autocalibration_tolerance)
+        cv2.setTrackbarPos('Vmax', 'image', data[2] + autocalibration_tolerance)
+cv2.setMouseCallback('original', onMouse)
 
 while(True):
     (grabbed, frame) = video.read()
@@ -89,7 +97,7 @@ while(True):
         smax = cv2.getTrackbarPos('Smax', 'image')
         vmax = cv2.getTrackbarPos('Vmax', 'image')
 
-        settingsFileRead = open("src/calibrationSettings.py")
+        settingsFileRead = open(os.path.dirname(os.path.abspath(__file__)) + "/../calibrationSettings.py")
         lines = []
       
         for line in settingsFileRead:
@@ -118,7 +126,7 @@ while(True):
 
         settingsFileRead.close()
 
-        settingsFileWrite = open("src/calibrationSettings.py", "w")
+        settingsFileWrite = open(os.path.dirname(os.path.abspath(__file__)) + "/../calibrationSettings.py", "w")
         settingsFileWrite.writelines(lines)
         settingsFileWrite.close()
 
