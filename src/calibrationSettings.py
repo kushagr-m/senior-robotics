@@ -1,5 +1,6 @@
 ballLower = (8, 0, 222)
 ballUpper = (68, 34, 255)
+ballDiameter = 65 # in millimeters
 
 goalLower = (5, 78, 224)
 goalUpper = (65, 138, 255)

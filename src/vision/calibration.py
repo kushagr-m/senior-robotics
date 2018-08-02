@@ -1,13 +1,20 @@
 import cv2
 import numpy as np
 import os
+import time
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 
 goalCalibration = False
 
 mins = [0,0,0]
 maxs = [0,0,0]
 
-video = cv2.VideoCapture(1)
+camera = PiCamera()
+camera.resolution = (640, 480)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(640, 480))
+time.sleep(0.1)
 
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 cv2.namedWindow('original', cv2.WINDOW_NORMAL)
@@ -35,7 +42,9 @@ cv2.setTrackbarPos('Vmax', 'image', 255)
 autocalibration_tolerance = 30
 def onMouse(event, x, y, flags, params):
     if event == cv2.EVENT_LBUTTONUP:
-        (grabbed, frame) = video.read()
+        raw = PiRGBArray(camera, size=(640, 480))
+        camera.capture(raw, format="bgr")
+        frame = raw.array
 
         goalCalibration = cv2.getTrackbarPos('GoalCalibration', 'image') == 1
         if goalCalibration:
@@ -55,16 +64,12 @@ def onMouse(event, x, y, flags, params):
         cv2.setTrackbarPos('Vmax', 'image', data[2] + autocalibration_tolerance)
 cv2.setMouseCallback('original', onMouse)
 
-while(True):
-    (grabbed, frame) = video.read()
+for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+    frame = _frame.array
 
     goalCalibration = cv2.getTrackbarPos('GoalCalibration', 'image') == 1
     if goalCalibration:
         frame = cv2.imread(os.path.dirname(os.path.abspath(__file__)) + '/../../callibyellow.png')
-
-    if not grabbed:
-        cv2.waitKey(10)
-        continue
 
     frame = cv2.resize(frame, (320, 240))
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -85,7 +90,7 @@ while(True):
     cv2.imshow('image', mask)
     cv2.imshow('original', frame)
 
-    key = cv2.waitKey(10)
+    key = cv2.waitKey(1)
     if key == 27:
         break
     elif key == 115:
@@ -129,5 +134,7 @@ while(True):
         settingsFileWrite = open(os.path.dirname(os.path.abspath(__file__)) + "/../calibrationSettings.py", "w")
         settingsFileWrite.writelines(lines)
         settingsFileWrite.close()
+
+    rawCapture.truncate(0)
 
 cv2.destroyAllWindows()

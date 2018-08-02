@@ -1,4 +1,12 @@
-from lib import *
+def circularRound(inValue, nearest = 45):
+    while (inValue >= 360):
+        inValue -= 360
+    return (round(inValue/nearest)*nearest)
+
+nPower = 0
+ePower = 0
+sPower = 0
+wPower = 0
 
 # RAW
 # power range: [-100,100]
@@ -7,31 +15,42 @@ from lib import *
 
 def N(power = 100):
     # set N power
+    nPower = power
     print("N(",power,")",sep='')
     return
 
 def E(power = 100):
     # set E power
+    ePower = power
     print("E(",power,")",sep='')
     return
 
 def S(power = 100):
     # set S power
+    sPower = power
     print("S(",power,")",sep='')
     return
 
 def W(power = 100):
     # set W power
+    wPower = power
     print("W(",power,")",sep='')
     return
 
-def getCurrent():
-    N = 0
-    E = 0
-    S = 0
-    W = 0
-    # get current motor power from arduino and store in N,E,S,W
-    return N,E,S,W
+# disastrous function doesnt work
+def getCurrent(whichWheel):
+    if whichWheel is None:
+        pass
+    elif whichWheel == "N":
+        return nPower
+    elif whichWheel == "E":
+        return ePower
+    elif whichWheel == "S":
+        return sPower
+    elif whichWheel == "W":
+        return wPower
+    else:
+        pass
 
 # Reset (stop all movement)
 def stop():
@@ -45,6 +64,7 @@ def stop():
 # power = between [-100,100]
 def direction(direction, power = 100):
     direction = circularRound(direction,45)
+    print("dir: ",direction)
     stop()
     if direction == 45:
         S(power)
@@ -70,4 +90,4 @@ def direction(direction, power = 100):
     else:
         E(power)
         W((-1*power))
-    return direction
+    return

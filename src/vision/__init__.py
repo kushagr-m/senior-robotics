@@ -5,12 +5,9 @@ import math
 # Calibration
 from calibrationSettings import *
 
-def getFrame(video):
-    (grabbed, frame) = video.read()
-    if grabbed:
-        frame = cv2.resize(frame, (frameDimensions))
-        return frame
-    return None
+def getFrame(_frame):
+    frame = cv2.resize(_frame, frameDimensions)
+    return frame
 
 def getHSVFrame(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
