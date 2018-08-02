@@ -8,6 +8,8 @@ from picamera import PiCamera
 import hardware.phobot.motors as motors
 import hardware.phobot.compass as compass
 
+import web
+
 from calibrationSettings import *
 
 camera = PiCamera()
@@ -19,6 +21,8 @@ time.sleep(0.1)
 video = cv2.VideoCapture(0)
 #video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+
+web.start()
 
 #define functions
 def ballDirection():
@@ -43,23 +47,24 @@ for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port
     overlayedFrame = frame.copy()
     hsv = vision.getHSVFrame(frame)
 
-    # Identify the ball
-    ballCenter, ballRadius = vision.findBall(hsv)
-    if ballCenter:
-        cv2.circle(overlayedFrame, ballCenter, ballRadius, (0, 255, 0), 2)
+    if web.is_running():
+        # Identify the ball
+        ballCenter, ballRadius = vision.findBall(hsv)
+        if ballCenter:
+            cv2.circle(overlayedFrame, ballCenter, ballRadius, (0, 255, 0), 2)
 
-    goalCenter, goalDimensions = vision.findGoal(hsv)
-    if goalCenter:
-        cv2.circle(overlayedFrame, goalCenter, 5, (0, 0, 255), 5)
-    
-    cv2.imshow('image', overlayedFrame)
+        goalCenter, goalDimensions = vision.findGoal(hsv)
+        if goalCenter:
+            cv2.circle(overlayedFrame, goalCenter, 5, (0, 0, 255), 5)
+        
+        cv2.imshow('image', overlayedFrame)
 
-    print("ballCenter: ", ballCenter)
-    print("ballRadius: ", ballRadius)
-    print("goalCenter: ", goalCenter)
-    print("goalDimens: ", goalDimensions)
-    if ballCenter:
-        print(ballDirection())
+        print("ballCenter: ", ballCenter)
+        print("ballRadius: ", ballRadius)
+        print("goalCenter: ", goalCenter)
+        print("goalDimens: ", goalDimensions)
+        if ballCenter:
+            print(ballDirection())
 
     rawCapture.truncate(0)
     # Stop program on ESC
