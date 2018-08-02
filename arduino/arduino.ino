@@ -122,10 +122,11 @@ void loop()
     mWspeed = inputString.toInt();
     }
     
-    //CODE TO MOVE THE MOTOR
-    Serial.println(inputString);
-    Serial.println(inputString.toInt());
+    //CODE TO MOVE THE MOTOR GOES HERE
+
     
+    Serial.println(inputString);
+    Serial.println(inputString.toInt());    
     //clear the string:
     inputString = "";
     stringComplete = false;
