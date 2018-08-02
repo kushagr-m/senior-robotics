@@ -24,10 +24,10 @@ int in24 = 2;
 String inputString = "";
 String outputString = "";
 boolean stringComplete = false;
-int m1Speed = 0;
-int m2Speed = 0;
-int m3Speed = 0;
-int m4Speed = 0;
+int mNspeed = 0;
+int mEspeed = 0;
+int mSspeed = 0;
+int mWspeed = 0;
 int motNum = 0;
 
 void setup()
@@ -54,24 +54,24 @@ void setup()
 
 void serialInput()
 {
-  //PETE'S BITS
    while (Serial.available()) {
-    // get the new byte:
+   // get the new byte:
     char inChar = (char)Serial.read(); 
     // add it to the inputString:
-    if (inChar == 'a')
+    
+    if (inChar == 'N')
     {
       motNum = 1;
     }
-    else if (inChar == 'b')
+    else if (inChar == 'E')
     {
       motNum = 2;
     }
-    else if (inChar == 'c')
+    else if (inChar == 'S')
     {
       motNum = 3;
     }
-    else if (inChar == 'd')
+    else if (inChar == 'W')
     {
       motNum = 4;
     }
@@ -83,7 +83,6 @@ void serialInput()
     {
       inputString += inChar;
     }
-    
   } 
 }
 
@@ -108,34 +107,30 @@ void serialOutput() {
 
 void loop()
 {
-  //Input Stuff
-  /*
-   * Kush, what is the notation for the motors?
-   * What is the format of the data to be received?
-   */
-  //PETE'S BITS
   serialInput();
   if (stringComplete) {
     if (motNum == 1) {
-    m1Speed = inputString.toInt();
+    mNspeed = inputString.toInt();
     }
     else if (motNum == 2) {
-    m2Speed = inputString.toInt();
+    mEspeed = inputString.toInt();
     }
     else if (motNum == 3) {
-    m3Speed = inputString.toInt();
+    mSspeed = inputString.toInt();
     }
     else if (motNum == 4) {
-    m4Speed = inputString.toInt();
+    mWspeed = inputString.toInt();
     }
-    bot.manualMotorsPWM(m1Speed, m2Speed, m3Speed, m4Speed);
+    
+    //CODE TO MOVE THE MOTOR
     Serial.println(inputString);
     Serial.println(inputString.toInt());
-     //clear the string:
+    
+    //clear the string:
     inputString = "";
     stringComplete = false;
   
-
   serialOutput();
   Serial.println(outputString);
+  }
 }
