@@ -1,7 +1,6 @@
 /*
- * en is used for analog data from 0 to 255
- * in is used for digital - HIGH and LOW data
- * The rest is self explanatory, deal with it
+ * en is used for analog data from 0 to 255 (but is mapped, so 0-100 over serial comms)
+ * in is used for digital - HIGH and LOW data, like instant h'bam... you know?
  */
 
 // board 1 motor 1
@@ -21,14 +20,14 @@ int en2B = 1;
 int in23 = 3;
 int in24 = 2;
 //Input and Output Data
+int nSpeed = 0
+int eSpeed = 0
+int sSpeed = 0
+int wSpeed = 0
 String inputString = "";
 String outputString = "";
 boolean stringComplete = false;
-int mNspeed = 0;
-int mEspeed = 0;
-int mSspeed = 0;
-int mWspeed = 0;
-int motNum = 0;
+int motNum = 1;
 
 void setup()
 {
@@ -48,34 +47,35 @@ void setup()
   pinMode(in23, OUTPUT);
   pinMode(in14, OUTPUT);
   pinMode(in24, OUTPUT);
-  
-  Serial.println("I am ready for command and conquer, boss!");
 }
 
 void serialInput()
+  //Select correct motor driver and motor for control
 {
    while (Serial.available()) {
-   // get the new byte:
     char inChar = (char)Serial.read(); 
-    // add it to the inputString:
     
     if (inChar == 'N')
     {
       motNum = 1;
+      stringComplete = true;
     }
     else if (inChar == 'E')
     {
       motNum = 2;
+      stringComplete = true;
     }
     else if (inChar == 'S')
     {
       motNum = 3;
+      stringComplete = true;
     }
     else if (inChar == 'W')
     {
       motNum = 4;
+      stringComplete = true;
     }
-    else if (inChar == '\n')
+    else if (inChar == '\n') //remove if necessary
     {
       stringComplete = true;
     }
@@ -110,25 +110,29 @@ void loop()
   serialInput();
   if (stringComplete) {
     if (motNum == 1) {
-    mNspeed = inputString.toInt();
+    nSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
     }
     else if (motNum == 2) {
-    mEspeed = inputString.toInt();
+    eSpeed = map(inputString.toInt(),0,100,0,255);
     }
     else if (motNum == 3) {
-    mSspeed = inputString.toInt();
+    sSpeed =map(inputString.toInt(),0,100,0,255);
     }
     else if (motNum == 4) {
-    mWspeed = inputString.toInt();
+    wSpeed = map(inputString.toInt(),0,100,0,255);
     }
     
-    //CODE TO MOVE THE MOTOR GOES HERE
-
+    analogWrite(en1A, nSpeed);
+    analogWrite(en1B, eSpeed);
+    analogWrite(en2A, sSpeed);
+    analogWrite(en2B, wSpeed);
     
-    Serial.println(inputString);
-    Serial.println(inputString.toInt());    
-    //clear the string:
+    Serial.print(nSpeed); //For testing only! Delete to prevent unnecessary undefined serial comms to rPi
+    Serial.print(eSpeed);
+    Serial.print(sSpeed);
+    Serial.println(wSpeed);
     inputString = "";
+    //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
   
   serialOutput();
