@@ -9,32 +9,32 @@ sPower = 0
 wPower = 0
 
 # RAW
-# power range: [-255,255]
+# power range: [-100,100]
 # -ve: counterclockwise
 # +ve: clockwise
 
-def N(power = 255):
+def N(power = 100):
     # set N power
     nPower = power
-    print("N(",power,")",sep='')
+    print("N("power")",sep='')
     return
 
-def E(power = 255):
+def E(power = 100):
     # set E power
     ePower = power
-    print("E(",power,")",sep='')
+    print("E("power")",sep='')
     return
 
-def S(power = 255):
+def S(power = 100):
     # set S power
     sPower = power
-    print("S(",power,")",sep='')
+    print("S("power")",sep='')
     return
 
-def W(power = 255):
+def W(power = 100):
     # set W power
     wPower = power
-    print("W(",power,")",sep='')
+    print("W("power")",sep='')
     return
 
 # disastrous function doesnt work
@@ -61,8 +61,8 @@ def stop():
     return
 
 # direction = clockwise degrees between [0,359]
-# power = between [-255,255]
-def direction(direction, power = 255):
+# power = between [-100,100]
+def direction(direction, power = 100):
     direction = circularRound(direction,45)
     print("dir: ",direction)
     stop()
