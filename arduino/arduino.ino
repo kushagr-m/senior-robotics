@@ -1,7 +1,10 @@
 /*
  * en is used for analog data from 0 to 255 (but is mapped, so 0-100 over serial comms)
  * in is used for digital - HIGH and LOW data, like instant h'bam... you know?
+ * input: DIRECTIONspeed (e.g. N100 - north wheel move at 100% power)
+ * output: ToFNumber:Distance (e.g. 1:234 - ToF sensor 1 measures 234mm)
  */
+#include "Adafruit_VL53L0X.h" // Adafruit library
 
 // board 1 motor 1
 int en1A = 13;
@@ -19,35 +22,27 @@ int in22 = 4;
 int en2B = 1;
 int in23 = 3;
 int in24 = 2;
+
+// dual ToF setup (i2c address and shut down pins - to set custom address)
+#define LOX1_ADDRESS 0x30
+#define LOX2_ADDRESS 0x31
+#define SHT_LOX1 14
+#define SHT_LOX2 15
+// ToF objects
+Adafruit_VL53L0X lox1 = Adafruit_VL53L0X();
+Adafruit_VL53L0X lox2 = Adafruit_VL53L0X();
+
 //Input and Output Data
-int nSpeed = 0
+VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
+VL53L0X_RangingMeasurementData_t measure2;
+int nSpeed = 0 // specific motor speed (percentage)
 int eSpeed = 0
 int sSpeed = 0
 int wSpeed = 0
-String inputString = "";
-String outputString = "";
-boolean stringComplete = false;
+String inputString = ""; // holds serial comm from rPi
+String outputString = ""; // sends ToF data to rPi
+boolean stringComplete = false; 
 int motNum = 1;
-
-void setup()
-{
-  Serial.begin(9600);
-  inputString.reserve(200);
-  outputString.reserve(200);
-  
-  pinMode(en1A, OUTPUT);
-  pinMode(en2A, OUTPUT);
-  pinMode(en1B, OUTPUT);
-  pinMode(en2B, OUTPUT);
-  pinMode(in11, OUTPUT);
-  pinMode(in21, OUTPUT);
-  pinMode(in12, OUTPUT);
-  pinMode(in22, OUTPUT);
-  pinMode(in13, OUTPUT);
-  pinMode(in23, OUTPUT);
-  pinMode(in14, OUTPUT);
-  pinMode(in24, OUTPUT);
-}
 
 void serialInput()
   //Select correct motor driver and motor for control
@@ -86,23 +81,85 @@ void serialInput()
   } 
 }
 
+void setID() {
+  // all reset
+  digitalWrite(SHT_LOX1, LOW);    
+  digitalWrite(SHT_LOX2, LOW);
+  delay(10);
+  // all unreset
+  digitalWrite(SHT_LOX1, HIGH);
+  digitalWrite(SHT_LOX2, HIGH);
+  delay(10);
+
+  // activating LOX1 and reseting LOX2
+  digitalWrite(SHT_LOX1, HIGH);
+  digitalWrite(SHT_LOX2, LOW);
+
+  // initing LOX1
+  if(!lox1.begin(LOX1_ADDRESS)) {
+    Serial.println(F("Failed to boot first VL53L0X"));
+    while(1);
+  }
+  delay(10);
+
+  // activating LOX2
+  digitalWrite(SHT_LOX2, HIGH);
+  delay(10);
+
+  //initing LOX2
+  if(!lox2.begin(LOX2_ADDRESS)) {
+    Serial.println(F("Failed to boot second VL53L0X"));
+    while(1);
+  }
+}
 
 void serialOutput() {
-  while (Serial.available()) {
-    //Code for time of flight sensors go here
-    //Format is RangeF:123, where 123 represents 123mm from the front sensor to an obstacle/wall in its front
+  
+  lox1.rangingTest(&measure1, false); // change to 'true' to get debug data
+  lox2.rangingTest(&measure2, false);
 
-    //TOF front
-    String ranf = "";
-    //TOF left
-    String ranl = "";
-    //TOF right
-    String ranr = "";
-    //TOF back
-    String ranb = "";
-
-    outputString = ranf + ranl + ranr + ranb;
+  // print sensor readings
+  Serial.print("1:");
+  if(measure1.RangeStatus != 4) {     // if not out of range
+    Serial.println(measure1.RangeMilliMeter);
+  } else {
+    Serial.println("out of range");
   }
+  Serial.print("2:");
+  if(measure2.RangeStatus != 4) {
+    Serial.println(measure2.RangeMilliMeter);
+  } else {
+    Serial.println("out of range");
+  }
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  inputString.reserve(200);
+  outputString.reserve(200);
+  
+  // wait for serial ready, shut down and reset for separate addresses
+  while (! Serial) { delay(1); }
+  pinMode(SHT_LOX1, OUTPUT);
+  pinMode(SHT_LOX2, OUTPUT);
+  digitalWrite(SHT_LOX1, LOW);
+  digitalWrite(SHT_LOX2, LOW);
+  setID();
+  
+  // motor driver outputs
+  pinMode(en1A, OUTPUT);
+  pinMode(en2A, OUTPUT);
+  pinMode(en1B, OUTPUT);
+  pinMode(en2B, OUTPUT);
+  pinMode(in11, OUTPUT);
+  pinMode(in21, OUTPUT);
+  pinMode(in12, OUTPUT);
+  pinMode(in22, OUTPUT);
+  pinMode(in13, OUTPUT);
+  pinMode(in23, OUTPUT);
+  pinMode(in14, OUTPUT);
+  pinMode(in24, OUTPUT);
 }
 
 void loop()
@@ -116,7 +173,7 @@ void loop()
     eSpeed = map(inputString.toInt(),0,100,0,255);
     }
     else if (motNum == 3) {
-    sSpeed =map(inputString.toInt(),0,100,0,255);
+    sSpeed = map(inputString.toInt(),0,100,0,255);
     }
     else if (motNum == 4) {
     wSpeed = map(inputString.toInt(),0,100,0,255);
@@ -134,8 +191,7 @@ void loop()
     inputString = "";
     //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
-  
+
   serialOutput();
-  Serial.println(outputString);
   }
 }
