@@ -1,7 +1,7 @@
 /*
  * en is used for analog data from 0 to 255 (but is mapped, so 0-100 over serial comms)
  * in is used for digital - HIGH and LOW data, like instant h'bam... you know?
- * input: DIRECTIONspeed (e.g. N100 - north wheel move at 100% power)
+ * input: DIRECTIONspeed (e.g. N100 - north wheel move at 100% power) 
  * output: ToFNumber:Distance (e.g. 1:234 - ToF sensor 1 measures 234mm)
  */
 #include "Adafruit_VL53L0X.h" // Adafruit library

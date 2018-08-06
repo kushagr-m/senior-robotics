@@ -14,27 +14,23 @@ wPower = 0
 # +ve: clockwise
 
 def N(power = 100):
-    # set N power
     nPower = power
-    print("N("power")",sep='')
+    print("N"+power)
     return
 
 def E(power = 100):
-    # set E power
     ePower = power
-    print("E("power")",sep='')
+    print("E"+power)
     return
 
 def S(power = 100):
-    # set S power
     sPower = power
-    print("S("power")",sep='')
+    print("S"+power)
     return
 
 def W(power = 100):
-    # set W power
     wPower = power
-    print("W("power")",sep='')
+    print("W"+power)
     return
 
 # disastrous function doesnt work
