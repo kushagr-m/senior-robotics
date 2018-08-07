@@ -35,10 +35,10 @@ Adafruit_VL53L0X lox2 = Adafruit_VL53L0X();
 //Input and Output Data
 VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
 VL53L0X_RangingMeasurementData_t measure2;
-int nSpeed = 0 // specific motor speed (percentage)
-int eSpeed = 0
-int sSpeed = 0
-int wSpeed = 0
+int nSpeed = 0; // specific motor speed (percentage)
+int eSpeed = 0;
+int sSpeed = 0;
+int wSpeed = 0;
 String inputString = ""; // holds serial comm from rPi
 String outputString = ""; // sends ToF data to rPi
 boolean stringComplete = false; 
