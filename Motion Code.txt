@@ -1,0 +1,52 @@
+Let P be the power from 0% to 100%
+P = Clockwise
+-P = Counter-Counter
+
+Moving Forward:			Power:
+Front right wheel: 		P*0.5*root(2)
+Front Left wheel: 		-P*0.5*root(2)
+Back right wheel: 		P*0.5*root(2)
+Back Left wheel: 		-P*0.5*root(2)
+
+Moving Backward:
+Front right wheel: 		-P*0.5*root(2)
+Front Left wheel: 		P*0.5*root(2)
+Back right wheel: 		-P*0.5*root(2)
+Back Left wheel: 		P*0.5*root(2)
+
+Strafing Right:
+Front right wheel: 		-P*0.5*root(2)
+Front Left wheel: 		-P*0.5*root(2)
+Back right wheel: 		P*0.5*root(2)
+Back Left wheel: 		P*0.5*root(2)
+
+Strafing Left:
+Front right wheel: 		P*0.5*root(2)
+Front Left wheel: 		P*0.5*root(2)
+Back right wheel: 		-P*0.5*root(2)
+Back Left wheel: 		-P*0.5*root(2)
+
+Rotate Clockwise:
+Front right wheel: 		-P
+Front Left wheel: 		-P
+Back right wheel: 		-P
+Back Left wheel: 		-P
+
+Rotate Counter-clockwise:
+Front right wheel: 		P
+Front Left wheel: 		P
+Back right wheel: 		P
+Back Left wheel: 		P
+
+
+Rotating Clockwise Around Center of Ball:
+Front right wheel: 		0
+Front Left wheel: 		0
+Back right wheel: 		-P
+Back Left wheel: 		-P
+
+Rotating Counter-Clockwise Around Center of Ball:
+Front right wheel: 		0
+Front Left wheel: 		0
+Back right wheel: 		P
+Back Left wheel:		P
