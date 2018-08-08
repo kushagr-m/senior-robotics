@@ -50,7 +50,7 @@ boolean stringComplete = false;
 int motNum = 1;
 
 void serialInput()
-  //Select correct motor driver and motor for control
+  //Select correct motor driver and motor for control, and wheel direction (i.e. CW or ACW)
 {
    while (Serial.available()) {
     char inChar = (char)Serial.read(); 
@@ -59,21 +59,65 @@ void serialInput()
     {
       motNum = 1;
       stringComplete = true;
+
+      if (inChar == '-')
+      {
+        digitalWrite(in11, LOW);
+        digitalWrite(in12, HIGH);
+      }
+      else
+      {
+        digitalWrite(in11, HIGH);
+        digitalWrite(in12, LOW);
+      }
     }
     else if (inChar == 'FR')
     {
       motNum = 2;
       stringComplete = true;
+
+      if (inChar == '-')
+      {
+        digitalWrite(in13, LOW);
+        digitalWrite(in14, HIGH);
+      }
+      else
+      {
+        digitalWrite(in13, HIGH);
+        digitalWrite(in14, LOW);
+      }
     }
     else if (inChar == 'BL')
     {
       motNum = 3;
       stringComplete = true;
+      
+      if (inChar == '-')
+      {
+        digitalWrite(in21, LOW);
+        digitalWrite(in22, HIGH);
+      }
+      else
+      {
+        digitalWrite(in21, HIGH);
+        digitalWrite(in22, LOW);
+      }
     }
     else if (inChar == 'BR')
     {
       motNum = 4;
       stringComplete = true;
+
+      if (inChar == '-')
+      {
+        digitalWrite(in23, LOW);
+        digitalWrite(in24, HIGH);
+      }
+      else
+      {
+        digitalWrite(in23, HIGH);
+        digitalWrite(in24, LOW);
+      }
     }
     else if (inChar == '\n') //remove if necessary
     {
@@ -231,13 +275,13 @@ void loop()
   float declinationAngle = (11.0 + (37.0 / 60.0)) / (180 / M_PI); // set declination angle
   heading += declinationAngle;
 
-  // Correct for when signs are reversed.
+  // Correct for when signs are reversed
   if(heading < 0)
     heading += 2*PI;
-  // Check for wrap due to addition of declination.
+  // Check for wrap due to addition of declination
   if(heading > 2*PI)
     heading -= 2*PI;
-  // Convert radians to degrees for readability.
+  // Convert radians to degrees
   float headingDegrees = heading * 180/M_PI; 
 
   Serial.println(headingDegrees); // degrees to north
