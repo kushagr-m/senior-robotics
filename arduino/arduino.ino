@@ -55,22 +55,22 @@ void serialInput()
    while (Serial.available()) {
     char inChar = (char)Serial.read(); 
     
-    if (inChar == 'N')
+    if (inChar == 'FL')
     {
       motNum = 1;
       stringComplete = true;
     }
-    else if (inChar == 'E')
+    else if (inChar == 'FR')
     {
       motNum = 2;
       stringComplete = true;
     }
-    else if (inChar == 'S')
+    else if (inChar == 'BL')
     {
       motNum = 3;
       stringComplete = true;
     }
-    else if (inChar == 'W')
+    else if (inChar == 'BR')
     {
       motNum = 4;
       stringComplete = true;
