@@ -4,7 +4,9 @@
  * input: DIRECTIONspeed (e.g. N100 - north wheel move at 100% power) 
  * output: ToFNumber:Distance (e.g. 1:234 - ToF sensor 1 measures 234mm)
  */
-#include "Adafruit_VL53L0X.h" // Adafruit library
+//#include "Adafruit_VL53L0X.h" // Created by Adafruit - library for ToF
+#include <Wire.h> // to communicate with i2c devices
+#include <HMC5883L.h> //Created by Korneliusz Jarzebski (c) 2014 - library for compass
 
 // board 1 motor 1
 int en1A = 13;
@@ -23,18 +25,20 @@ int en2B = 1;
 int in23 = 3;
 int in24 = 2;
 
-// dual ToF setup (i2c address and shut down pins - to set custom address)
-#define LOX1_ADDRESS 0x30
-#define LOX2_ADDRESS 0x31
-#define SHT_LOX1 14
-#define SHT_LOX2 15
-// ToF objects
-Adafruit_VL53L0X lox1 = Adafruit_VL53L0X();
-Adafruit_VL53L0X lox2 = Adafruit_VL53L0X();
+HMC5883L compass; // set as compass
 
-//Input and Output Data
-VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
-VL53L0X_RangingMeasurementData_t measure2;
+//// dual ToF setup (i2c address and shut down pins - to set custom address)
+//#define LOX1_ADDRESS 0x30
+//#define LOX2_ADDRESS 0x31
+//#define SHT_LOX1 14
+//#define SHT_LOX2 15
+//// ToF objects
+//Adafruit_VL53L0X lox1 = Adafruit_VL53L0X();
+//Adafruit_VL53L0X lox2 = Adafruit_VL53L0X();
+//
+////Input and Output Data
+//VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
+//VL53L0X_RangingMeasurementData_t measure2;
 int nSpeed = 0; // specific motor speed (percentage)
 int eSpeed = 0;
 int sSpeed = 0;
@@ -115,22 +119,22 @@ void setID() {
 
 void serialOutput() {
   
-  lox1.rangingTest(&measure1, false); // change to 'true' to get debug data
-  lox2.rangingTest(&measure2, false);
-
-  // print sensor readings
-  Serial.print("1:");
-  if(measure1.RangeStatus != 4) {     // if not out of range
-    Serial.println(measure1.RangeMilliMeter);
-  } else {
-    Serial.println("out of range");
-  }
-  Serial.print("2:");
-  if(measure2.RangeStatus != 4) {
-    Serial.println(measure2.RangeMilliMeter);
-  } else {
-    Serial.println("out of range");
-  }
+//  lox1.rangingTest(&measure1, false); // change to 'true' to get debug data
+//  lox2.rangingTest(&measure2, false);
+//
+//  // print sensor readings
+//  Serial.print("1:");
+//  if(measure1.RangeStatus != 4) {     // if not out of range
+//    Serial.println(measure1.RangeMilliMeter);
+//  } else {
+//    Serial.println("out of range");
+//  }
+//  Serial.print("2:");
+//  if(measure2.RangeStatus != 4) {
+//    Serial.println(measure2.RangeMilliMeter);
+//  } else {
+//    Serial.println("out of range");
+//  }
 }
 
 void setup()
@@ -139,13 +143,26 @@ void setup()
   inputString.reserve(200);
   outputString.reserve(200);
   
-  // wait for serial ready, shut down and reset for separate addresses
-  while (! Serial) { delay(1); }
-  pinMode(SHT_LOX1, OUTPUT);
-  pinMode(SHT_LOX2, OUTPUT);
-  digitalWrite(SHT_LOX1, LOW);
-  digitalWrite(SHT_LOX2, LOW);
-  setID();
+//  // wait for serial ready, shut down and reset for separate addresses
+//  while (! Serial) { delay(1); }
+//  pinMode(SHT_LOX1, OUTPUT);
+//  pinMode(SHT_LOX2, OUTPUT);
+//  digitalWrite(SHT_LOX1, LOW);
+//  digitalWrite(SHT_LOX2, LOW);
+//  setID();
+
+  // initialise HMC5883L
+  while (!compass.begin())
+  {
+    Serial.println("Could not find a valid HMC5883L sensor");
+    delay(500);
+  }
+
+  compass.setRange(HMC5883L_RANGE_1_3GA);
+  compass.setMeasurementMode(HMC5883L_CONTINOUS);
+  compass.setDataRate(HMC5883L_DATARATE_30HZ);
+  compass.setSamples(HMC5883L_SAMPLES_8);
+  compass.setOffset(0, 0);
   
   // motor driver outputs
   pinMode(en1A, OUTPUT);
@@ -192,6 +209,35 @@ void loop()
     //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
 
-  serialOutput();
+  // compass stuff
+  Vector norm = compass.readNormalize();
+
+  // Calculate heading
+  float heading = atan2(norm.YAxis, norm.XAxis);
+  float declinationAngle = (11.0 + (37.0 / 60.0)) / (180 / M_PI); // set declination angle
+  heading += declinationAngle;
+
+  // Correct for heading < 0deg and heading > 360deg
+  if (heading < 0)
+  {
+    heading += 2 * PI;
+  }
+
+  if (heading > 2 * PI)
+  {
+    heading -= 2 * PI;
+  }
+
+  // Convert to degrees
+  float headingDegrees = heading * 180/M_PI; 
+
+  // Output
+  Serial.print("Heading = ");
+  Serial.print(heading);
+  Serial.print("Degress = ");
+  Serial.print(headingDegrees);
+  Serial.println();
+
+  serialOutput(); // ignore for now - ToF stuff
   }
 }
