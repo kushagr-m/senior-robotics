@@ -33,8 +33,7 @@ video = cv2.VideoCapture(0)
 #video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
-web.start()
-
+#web.start()
 
 def runBot():
 	if web.is_running():
@@ -49,7 +48,7 @@ compassInitial = dataCompass
 mode = 0 #0=atk, 1=def
 
 # per frame loop
-while runBot():
+while True:
 
 	for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 		frame = vision.getFrame(_frame.array)
