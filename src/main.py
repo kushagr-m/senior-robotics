@@ -5,35 +5,53 @@ import time
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
+from calibrationSettings import *
 import hardware.phobot.motors as motors
-import hardware.phobot.compass as compass
 
 import web
 
-from calibrationSettings import *
+# serial_read -----------------
 
-camera = PiCamera()
-camera.resolution = (640, 480)
-camera.framerate = 32
-rawCapture = PiRGBArray(camera, size=(640, 480))
-time.sleep(0.1)
+import serial
+ser = serial.Serial('/dev/ttyACM0',115200) # change to ACM1 if that is the USB port
 
-video = cv2.VideoCapture(0)
-#video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
-cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+while True:
+    readSerial=ser.readline() # reads from serial until EOL character received - i.e. \n
+    
+    if ':' in readSerial:
+        dataTOF = readSerial
+    else:
+        dataCompass = readSerial
+
+# -----------------------------
+
+
+# empty variables for functions
+
+compassInitial = 0
+
+# -----------------------------
+
+# CV
+if True:
+    camera = PiCamera()
+    camera.resolution = (640, 480)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(640, 480))
+    time.sleep(0.1)
+
+    video = cv2.VideoCapture(0)
+    #video = cv2.VideoCapture(os.path.dirname(os.path.abspath(__file__)) + '/../goaliepov.mp4')
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
 web.start()
 
-#define functions
-def ballDirection():
-    if ((frameDimensions[0]-ballCenterPadding)/2 < ballCenter[0] < (frameDimensions[0]+ballCenterPadding)/2):
-        return "center"
-    elif (ballCenter[0] > (frameDimensions[0]/2)):
-        return "right"
-    elif (ballCenter[0] < (frameDimensions[0]/2)):
-        return "left"
-    else: 
-        pass
+def runBot():
+    if web.is_running():
+        return True
+    else:
+        return False
+    return
         
 #per frame 
 #loop
@@ -47,7 +65,7 @@ for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port
     overlayedFrame = frame.copy()
     hsv = vision.getHSVFrame(frame)
 
-    if web.is_running():
+    if runBot():
         # Identify the ball
         ballCenter, ballRadius = vision.findBall(hsv)
         if ballCenter:
@@ -59,6 +77,7 @@ for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port
         
         cv2.imshow('image', overlayedFrame)
 
+        # Print Ball Statistics
         print("ballCenter: ", ballCenter)
         print("ballRadius: ", ballRadius)
         print("goalCenter: ", goalCenter)
@@ -71,5 +90,51 @@ for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port
     key = cv2.waitKey(1)
     if key == 27:
         break
+
+
+# calibrate
+
+def calibrateAI():
+
+    compassInitial = dataCompass
+
+    return
+
+
+# DIRECTION HELPER FUNCTIONS
+
+from ai_fns import *
+from ai_defend import *
+from ai_attack import *
+
+
+"""
+    # track the ball at all times
+    if ballDirection() == "left":
+        motors.rotate(-100)
+    elif ballDirection() == "right":
+        motors.rotate(100)
+
+    if (ballDirection() == "center" && goalComDir() == "center"):
+        motors.direction(0)
+    
+    if (goalComDir() == "left"):
+        motors.direction(45)
+    elif (goalComDir() == "right"):
+        motors.direction(315)
+
+
+facing: FORWARDS AT ALL TIMES WITHIN 180deg of the goal
+
+always face the ball (while facing forward)
+
+never face our own goal
+
+if there is a straight shot
+
+
+if ball is going towards our goal
+    goto our goal
+"""
 
 cv2.destroyAllWindows()

@@ -3,6 +3,8 @@ def circularRound(inValue, nearest = 45):
         inValue -= 360
     return (round(inValue/nearest)*nearest)
 
+sqrtTwo = 1.414
+
 nPower = 0
 ePower = 0
 sPower = 0
@@ -13,77 +15,111 @@ wPower = 0
 # -ve: counterclockwise
 # +ve: clockwise
 
-def N(power = 100):
-    nPower = power
-    print("N"+power)
+def FL(power = 100):
+    FLPower = power
+    print("a"+power)
     return
 
-def E(power = 100):
-    ePower = power
-    print("E"+power)
+def FR(power = 100):
+    FRPower = power
+    print("b"+power)
     return
 
-def S(power = 100):
-    sPower = power
-    print("S"+power)
+def BR(power = 100):
+    BRPower = power
+    print("c"+power)
     return
 
-def W(power = 100):
-    wPower = power
-    print("W"+power)
+def BL(power = 100):
+    BLPower = power
+    print("d"+power)
     return
 
-# disastrous function doesnt work
-def getCurrent(whichWheel):
-    if whichWheel is None:
-        pass
-    elif whichWheel == "N":
-        return nPower
-    elif whichWheel == "E":
-        return ePower
-    elif whichWheel == "S":
-        return sPower
-    elif whichWheel == "W":
-        return wPower
-    else:
-        pass
 
 # Reset (stop all movement)
 def stop():
-    N(0)
-    E(0)
-    S(0)
-    W(0)
+    FL(0)
+    FR(0)
+    BL(0)
+    BR(0)
     return
 
-# direction = clockwise degrees between [0,359]
+# GO IN A CERTAIN DIRECTION
 # power = between [-100,100]
-def direction(direction, power = 100):
-    direction = circularRound(direction,45)
-    print("dir: ",direction)
-    stop()
-    if direction == 45:
-        S(power)
-        W(-1*power)
-    elif direction == 90:
-        N(-1*power)
-        S(power)
-    elif direction == 135:
-        N(-1*power)
-        W(power)
-    elif direction == 180:
-        E(-1*power)
-        W(power)
-    elif direction == 225:
-        N(power)
-        E(-1*power)
-    elif direction == 270:
-        N(power)
-        S(-1*power)
-    elif direction == 315:
-        E(power)
-        S(-1*power)
-    else:
-        E(power)
-        W((-1*power))
+def goStraight(power = 100):
+    FR(power)
+    FL(-1*power)
+    BR(power)
+    BL(-1*power)
     return
+
+def goLeft(power = 100):
+    FR(power)
+    FL(power)
+    BR(-1*power)
+    BL(-1*power)
+    return
+
+def goRight(power = 100):
+    FR(-1*power)
+    FL(-1*power)
+    BR(power)
+    BL(power)
+    return
+
+def goBack(power = 100):
+    FR(-1*power)
+    FL(power)
+    BR(-1*power)
+    BL(power)
+    return
+
+def goFR(power = 100):
+    return
+
+def goFL(power = 100):
+    return
+
+def goBR(power = 100):
+    return
+
+def goBL(power = 100):
+    return
+
+def rotateCenter(direction = "left", power = 100):
+
+    if direction = "left":
+        #counterclockwise
+        FR(power)
+        FL(power)
+        BR(power)
+        BL(power)
+
+    if direction = "right":
+        #clockwise
+        FR(-1*power)
+        FL(-1*power)
+        BR(-1*power)
+        BL(-1*power)
+
+    return
+
+def rotateFrAxis(direction = "left", power = 100):
+
+    if direction = "left":
+        #counterclockwise
+        FR(0)
+        FL(0)
+        BR(-1*power)
+        BL(-1*power)
+
+    if direction = "right":
+        #clockwise
+        FR(0)
+        FL(0)
+        BR(power)
+        BL(power)
+
+    return
+
+

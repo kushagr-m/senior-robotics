@@ -1,52 +1,52 @@
-Let P be the power from 0% to 100%
-P = Clockwise
--P = Counter-Counter
+Let power be the power from 0% to 100%
+power = Clockwise
+-power = Counter-Counter
 
-Moving Forward:			Power:
-Front right wheel: 		P*0.5*root(2)
-Front Left wheel: 		-P*0.5*root(2)
-Back right wheel: 		P*0.5*root(2)
-Back Left wheel: 		-P*0.5*root(2)
+Moving Forward:			
+Front right wheel: 		power*0.5*root(2)
+Front Left wheel: 		-power*0.5*root(2)
+Back right wheel: 		power*0.5*root(2)
+Back Left wheel: 		-power*0.5*root(2)
 
 Moving Backward:
-Front right wheel: 		-P*0.5*root(2)
-Front Left wheel: 		P*0.5*root(2)
-Back right wheel: 		-P*0.5*root(2)
-Back Left wheel: 		P*0.5*root(2)
+Front right wheel: 		-power*0.5*root(2)
+Front Left wheel: 		power*0.5*root(2)
+Back right wheel: 		-power*0.5*root(2)
+Back Left wheel: 		power*0.5*root(2)
 
 Strafing Right:
-Front right wheel: 		-P*0.5*root(2)
-Front Left wheel: 		-P*0.5*root(2)
-Back right wheel: 		P*0.5*root(2)
-Back Left wheel: 		P*0.5*root(2)
+Front right wheel: 		-power*0.5*root(2)
+Front Left wheel: 		-power*0.5*root(2)
+Back right wheel: 		power*0.5*root(2)
+Back Left wheel: 		power*0.5*root(2)
 
 Strafing Left:
-Front right wheel: 		P*0.5*root(2)
-Front Left wheel: 		P*0.5*root(2)
-Back right wheel: 		-P*0.5*root(2)
-Back Left wheel: 		-P*0.5*root(2)
+Front right wheel: 		power*0.5*root(2)
+Front Left wheel: 		power*0.5*root(2)
+Back right wheel: 		-power*0.5*root(2)
+Back Left wheel: 		-power*0.5*root(2)
 
 Rotate Clockwise:
-Front right wheel: 		-P
-Front Left wheel: 		-P
-Back right wheel: 		-P
-Back Left wheel: 		-P
+Front right wheel: 		-power
+Front Left wheel: 		-power
+Back right wheel: 		-power
+Back Left wheel: 		-power
 
 Rotate Counter-clockwise:
-Front right wheel: 		P
-Front Left wheel: 		P
-Back right wheel: 		P
-Back Left wheel: 		P
+Front right wheel: 		power
+Front Left wheel: 		power
+Back right wheel: 		power
+Back Left wheel: 		power
 
 
 Rotating Clockwise Around Center of Ball:
 Front right wheel: 		0
 Front Left wheel: 		0
-Back right wheel: 		-P
-Back Left wheel: 		-P
+Back right wheel: 		-power
+Back Left wheel: 		-power
 
 Rotating Counter-Clockwise Around Center of Ball:
 Front right wheel: 		0
 Front Left wheel: 		0
-Back right wheel: 		P
-Back Left wheel:		P
+Back right wheel: 		power
+Back Left wheel:		power

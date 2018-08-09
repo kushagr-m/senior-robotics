@@ -12,5 +12,4 @@ arduino code for robocup soccer open division
 ### Todo:
 - [ ] work out algorithms to figure out ball position and movement
 - [ ] work out how to react to the ball position
-- [ ] work out how to implement holonomic movement (with a locked direction)
 - [ ] work out horizontal position of the bot for nudges etc
