@@ -75,15 +75,31 @@ def goBack(power = 100):
     return
 
 def goFR(power = 100):
+    FL(-1*power)
+    FR(0)
+    BL(0)
+    BR(power)
     return
 
 def goFL(power = 100):
+    FL(0)
+    FR(power)
+    BL(-1*power)
+    BR(0)
     return
 
 def goBR(power = 100):
+    FL(0)
+    FR(-1*power)
+    BL(power)
+    BR(0)
     return
 
 def goBL(power = 100):
+    FL(power)
+    FR(0)
+    BL(0)
+    BR(-1*power)
     return
 
 def rotateCenter(direction = "left", power = 100):
