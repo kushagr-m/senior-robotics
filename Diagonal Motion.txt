@@ -1,0 +1,29 @@
+power = Clockwise spin
+-1*power = Counter-Clockwise spin
+
+Move Forward Right:
+FL(-1*power)
+FR(0)
+BL(0)
+BR(power)
+
+Move Forward Left:
+FL(0)
+FR(power)
+BL(-1*power)
+BR(0)
+
+Move Backwards Right:
+FL(0)
+FR(-1*power)
+BL(power)
+BR(0)
+
+Move Backwards Left:
+FL(power)
+FR(0)
+BL(0)
+BR(-1*power)
+
+
+
