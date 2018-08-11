@@ -9,4 +9,6 @@ goalMinSize = (10, 4)
 
 # horz and vert size of frame
 frameDimensions = 320, 240
+
+mode = 0 #0=atk, 1=def
 ballCenterPadding = 10
