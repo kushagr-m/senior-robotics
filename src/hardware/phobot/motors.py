@@ -1,14 +1,7 @@
-def circularRound(inValue, nearest = 45):
-    while (inValue >= 360):
-        inValue -= 360
-    return (round(inValue/nearest)*nearest)
-
-sqrtTwo = 1.414
-
-nPower = 0
-ePower = 0
-sPower = 0
-wPower = 0
+FLPower = 0
+FRPower = 0
+BRPower = 0
+BLPower = 0
 
 # RAW
 # power range: [-100,100]

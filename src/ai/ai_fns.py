@@ -1,4 +1,9 @@
-from main import *
+from ..main import *
+
+def circularRound(inValue, nearest = 45):
+    while (inValue >= 360):
+        inValue -= 360
+    return (round(inValue/nearest)*nearest)
 
 ballCloseRadius = 40
 #radius of the ball being close

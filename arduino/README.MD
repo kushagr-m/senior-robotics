@@ -3,8 +3,8 @@
 To communicate with a specific motor: `DIRECTIONspeed`
 
 **for example:**  
-`N100` (North motor at 100% power)  
-`N-100` (North motor at -100% power)
+`a100` (FL motor at 100% power)  
+`b-100` (FR motor at -100% power)
 
 # RECIEVING TOF DATA
 

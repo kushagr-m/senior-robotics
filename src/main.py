@@ -9,14 +9,10 @@ from picamera import PiCamera
 
 from calibrationSettings import *
 
-import web
+#import web
 
-from hardware.phobot.sensors import *
-import hardware.phobot.motors as motors
-
-from ai_fns import *
-from ai_defend import *
-from ai_attack import *
+import hardware
+import ai
 
 compassInitial = 0
 
