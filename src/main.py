@@ -36,7 +36,7 @@ cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 #web.start()
 
 def runBot():
-	if web.is_running():
+	if True:
 		return True
 	else:
 		return False
@@ -48,7 +48,7 @@ compassInitial = dataCompass
 mode = 0 #0=atk, 1=def
 
 # per frame loop
-while True:
+while runBot():
 
 	for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 		frame = vision.getFrame(_frame.array)
