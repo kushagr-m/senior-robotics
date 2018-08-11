@@ -9,9 +9,9 @@ def readSerial():
    #elif '2:' in readSerial:
    #    data2TOF = readSerial
    #elif '3:' in readSerial:
-   #    data3OF = readSerial
+   #    data3TOF = readSerial
    #elif '4:' in readSerial:
-   #    data4OF = readSerial
+   #    data4TOF = readSerial
    if 'HIGH' in readSerial: # Momentary switch to detect ball VV
        dataSwitch = readSerial
    elif 'LOW' in readSerial:
