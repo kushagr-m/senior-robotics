@@ -8,8 +8,6 @@ def circularRound(inValue, nearest = 45):
 ballCloseRadius = 40
 #radius of the ball being close
 
-ballCenterPadding = 10
-
 def ballDirection():
     if ((frameDimensions[0] - ballCenterPadding)/2 < ballCenter[0] < (frameDimensions[0] + ballCenterPadding)/2):
         return 0

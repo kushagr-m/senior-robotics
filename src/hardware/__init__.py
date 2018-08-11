@@ -1,2 +1,2 @@
-from phobot.sensors import *
-import phobot.motors as motors
+from .phobot.sensors import *
+import .phobot.motors as motors

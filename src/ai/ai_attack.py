@@ -9,7 +9,7 @@ def attack():
     """
 
     # if we have the ball
-    if read.momentary():
+    if dataSwitch:
 
         if goalCenter is not None:
             # if goal is in view

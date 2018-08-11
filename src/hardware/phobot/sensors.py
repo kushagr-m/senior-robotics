@@ -13,8 +13,8 @@ def readSerial():
    #elif '4:' in readSerial:
    #    data4TOF = readSerial
    if 'HIGH' in readSerial: # Momentary switch to detect ball VV
-       dataSwitch = readSerial
+       dataSwitch = True
    elif 'LOW' in readSerial:
-       dataSwitch = readSerial
+       dataSwitch = False
    else: # The only thing else that readSerial can be
-       dataCompass = readSerial
+       dataCompass = int(readSerial)
