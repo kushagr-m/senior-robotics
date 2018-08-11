@@ -10,21 +10,29 @@
 #include <Adafruit_HMC5883_U.h> // specifically for compass
 
 // board 1 motor 1
-int en1A = 13;
-int in11 = 12;
-int in12 = 11;
+const int en1A = 13;
+const int in11 = 12;
+const int in12 = 11;
 // board 1 motor 2
-int en1B = 8;
-int in13 = 10;
-int in14 = 9;
+const int en1B = 8;
+const int in13 = 10;
+const int in14 = 9;
 // board 2 motor 3
-int en2A = 6;
-int in21 = 5;
-int in22 = 4;
+const int en2A = 6;
+const int in21 = 5;
+const int in22 = 4;
 // board 2 motor 4
-int en2B = 1;
-int in23 = 3;
-int in24 = 2;
+const int en2B = 1;
+const int in23 = 3;
+const int in24 = 2;
+
+// momentary switch stuff for ball detection
+const int sw = 22;
+int swOut = HIGH;
+int swState;
+int lastSwState = LOW;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50; // CHANGE TO FIT
 
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345); // assign ID to compass
 
@@ -163,7 +171,7 @@ void setID() {
 }
 
 void serialOutput() {
-  
+  // ToF Code  
 //  lox1.rangingTest(&measure1, false); // change to 'true' to get debug data
 //  lox2.rangingTest(&measure2, false);
 //
@@ -180,6 +188,23 @@ void serialOutput() {
 //  } else {
 //    Serial.println("out of range");
 //  }
+
+  // debounced momentary switch code - UNTESTED
+  int reading = digitalRead(sw);
+  if (reading != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis()-lastDebounceTime > debounceDelay) {
+    if (reading != swState) {
+      swState = reading;
+      if (swState == HIGH) {
+        swOut = !swOut;
+      }
+    }
+  }
+  Serial.println(swState);
+  lastSwState = reading;
 }
 
 void displaySensorDetails(void) // use in setup for debug or info if needed
@@ -221,7 +246,7 @@ void setup()
 
 //displaySensorDetails(); // uncomment for debug  
   
-  // motor driver outputs
+  // motor driver outputs and momentary switch input
   pinMode(en1A, OUTPUT);
   pinMode(en2A, OUTPUT);
   pinMode(en1B, OUTPUT);
@@ -234,6 +259,7 @@ void setup()
   pinMode(in23, OUTPUT);
   pinMode(in14, OUTPUT);
   pinMode(in24, OUTPUT);
+  pinMode(sw, INPUT);
 }
 
 void loop()
@@ -286,6 +312,6 @@ void loop()
 
   Serial.println(headingDegrees); // degrees to north
 
-  //serialOutput(); // ignore for now - ToF stuff
+  serialOutput(); // currently only momentary switch, no ToF
   }
 }
