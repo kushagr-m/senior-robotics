@@ -204,7 +204,28 @@ void serialOutput() {
     }
   }
   Serial.println(swState);
-  lastSwState = reading;
+  lastSwState = reading;      
+    
+  // compass stuff
+  // create new compass sensor events
+  sensors_event_t event; 
+  mag.getEvent(&event);
+
+  // Calculate heading
+  float heading = atan2(event.magnetic.y, event.magnetic.x); // z axis points up
+  float declinationAngle = (11.0 + (37.0 / 60.0)) / (180 / M_PI); // set declination angle
+  heading += declinationAngle;
+
+  // Correct for when signs are reversed
+  if(heading < 0)
+    heading += 2*PI;
+  // Check for wrap due to addition of declination
+  if(heading > 2*PI)
+    heading -= 2*PI;
+  // Convert radians to degrees
+  float headingDegrees = heading * 180/M_PI; 
+
+  Serial.println(headingDegrees); // degrees to north    
 }
 
 void displaySensorDetails(void) // use in setup for debug or info if needed
@@ -221,8 +242,8 @@ void displaySensorDetails(void) // use in setup for debug or info if needed
   Serial.println("------------------------------------");
   Serial.println("");
   delay(500);
-}
-
+}      
+      
 void setup()
 {
   Serial.begin(115200);
@@ -292,26 +313,6 @@ void loop()
     //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
 
-  // create new compass sensor events
-  sensors_event_t event; 
-  mag.getEvent(&event);
-
-  // Calculate heading
-  float heading = atan2(event.magnetic.y, event.magnetic.x); // z axis points up
-  float declinationAngle = (11.0 + (37.0 / 60.0)) / (180 / M_PI); // set declination angle
-  heading += declinationAngle;
-
-  // Correct for when signs are reversed
-  if(heading < 0)
-    heading += 2*PI;
-  // Check for wrap due to addition of declination
-  if(heading > 2*PI)
-    heading -= 2*PI;
-  // Convert radians to degrees
-  float headingDegrees = heading * 180/M_PI; 
-
-  Serial.println(headingDegrees); // degrees to north
-
-  serialOutput(); // currently only momentary switch, no ToF
+  serialOutput(); // currently compass and momentary switch, no ToF
   }
 }
