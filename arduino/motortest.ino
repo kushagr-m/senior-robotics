@@ -78,8 +78,8 @@ void loop()
     flrSpeed = 0;
     }
     else if (motNum == 11) {
-    nSpeed = map(inputString.toInt(),0,100,0,255);
-    noSpeed = 0;
+    flSpeed = map(inputString.toInt(),0,100,0,255);
+    flrSpeed = 0;
     }
   }
     
