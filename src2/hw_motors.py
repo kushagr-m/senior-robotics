@@ -1,7 +1,14 @@
+import serial
+ser = serial.Serial('/dev/ttyACM0',115200) # change to ACM1 if that is the USB port
+#AMA0
 FLPower = 0
 FRPower = 0
 BRPower = 0
 BLPower = 0
+
+motorDebug = False
+
+    
 
 # motor control functions
 # converts python to arduino
@@ -14,7 +21,9 @@ def FL(power = 100):
     elif (power < 0):
         out = "A"
     out = str(abs(power)) + out
-    print(out)
+    if motorDebug:
+        print(out)
+    ser.write(str.encode(out))
     return
 
 def FR(power = 100):
@@ -25,29 +34,35 @@ def FR(power = 100):
     elif (power < 0):
         out = "B"
     out = str(abs(power)) + out
-    print(out)
+    if motorDebug:
+        print(out)
+    ser.write(str.encode(out))
     return
 
 def BR(power = 100):
     global BRPower
     BRPower = power
     if (power >= 0):
-        out = "c"
+        out = "d"
     elif (power < 0):
-        out = "C"
+        out = "D"
     out = str(abs(power)) + out
-    print(out)
+    if motorDebug:
+        print(out)
+    ser.write(str.encode(out))
     return
 
 def BL(power = 100):
     global BLPower
     BLPower = power
     if (power >= 0):
-        out = "d"
+        out = "c"
     elif (power < 0):
-        out = "D"
+        out = "C"
     out = str(abs(power)) + out
-    print(out)
+    if motorDebug:
+        print(out)
+    ser.write(str.encode(out))
     return
 
 # motor helper functions

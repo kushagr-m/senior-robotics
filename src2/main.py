@@ -1,5 +1,5 @@
 import hw_motors as motors
-from hw_read import *
+#from hw_read import *
 
 import hw_compass as compass
 
@@ -21,26 +21,33 @@ def goalComDir():
 	global compassInitial
 
 	compassAngle = compass.readAngle()
-    relativeDir = compassAngle-compassInitial
-
-    if relativeDir<=-180:
-        relativeDir+=360
-
-    elif relativeDir>180:
-        relativeDir-=360
-        
-    return relativeDir
+	relativeDir = compassAngle-compassInitial
+	
+	if relativeDir<=-180:
+		relativeDir+=360
+	
+	elif relativeDir>180:
+		relativeDir-=360
+		
+	return relativeDir
 
 while True:
 
-	print(flush=True)
-	print("compassInitial   {}".format(compassInitial))
-	print("compassReadAngle {}".format(compass.readAngle()))
-	print("compassRelative  {}".format(goalComDir())
-	print("momentarySwitch  {}".format(momentary.read()))
+	try:
+		
+		print("compassInitial   {}".format(compassInitial))
+		print("compassReadAngle {}".format(compass.readAngle()))
+		print("compassRelative  {}".format(goalComDir()))
+		print("momentarySwitch  {}".format(momentary.read()))
 
-	"""if botMode == 0:
-		attack()
+		sleepdur = 0.4
+			
 
-	elif botMode == 1:
-		defend()"""
+		"""if botMode == 0:
+			attack()
+
+		elif botMode == 1:
+			defend()"""
+	
+	except KeyboardInterrupt:
+		motors.stop()

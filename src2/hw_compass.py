@@ -53,5 +53,5 @@ def readAngle():
 	headingAngle = int(heading * 180/pi)
 	return headingAngle
 
-while True:
-	print("Heading: " + str(readAngle()), flush=True)
+#while True:
+#	print("Heading: " + str(readAngle()), flush=True)
