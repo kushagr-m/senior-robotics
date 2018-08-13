@@ -14,6 +14,7 @@ int flSpeed = 0;
 int flrSpeed = 0;
 String inputString = ""; // holds serial comm from rPi
 String outputString = ""; // sends ToF data to rPi
+boolean stringComplete = false;
 int motNum = 1;
 
 int MAX_CMD_LENGTH = 10;
@@ -86,5 +87,6 @@ void loop()
     analogWrite(in12, flrSpeed);
     
     inputString = "";
+  stringComplete = false;
     //Add lines to clear xSpeed here if value retention not wanted
 }
