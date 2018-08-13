@@ -30,8 +30,7 @@ void serialInput()
       char byteIn = Serial.read();
       cmd[cmdIndex] = byteIn;
       
-      if(byteIn=='\n'){
-        //command finished
+      if(stringComplete = true){
         cmd[cmdIndex] = '\0';
         Serial.println(cmd);
         cmdIndex = 0;
@@ -39,11 +38,11 @@ void serialInput()
         if(strcmp(cmd, "FL")  == 0){
           motNum = 1;
           stringComplete = true;
-          Serial.println(FL CW);
+          Serial.println("FL CW");
         }else if (strcmp(cmd, "FL-")  == 0) {
           motNum = 11;
           stringComplete = true;
-          Serial.println(FL ACW);
+          Serial.println("FL ACW");
         }
         
       }else{
