@@ -13,7 +13,7 @@ def FL(power = 100):
         out = "a"
     elif (power < 0):
         out = "A"
-    out = out + str(abs(power))
+    out = str(abs(power)) + out
     print(out)
     return
 
@@ -24,7 +24,7 @@ def FR(power = 100):
         out = "b"
     elif (power < 0):
         out = "B"
-    out = out + str(abs(power))
+    out = str(abs(power)) + out
     print(out)
     return
 
@@ -35,7 +35,7 @@ def BR(power = 100):
         out = "c"
     elif (power < 0):
         out = "C"
-    out = out + str(abs(power))
+    out = str(abs(power)) + out
     print(out)
     return
 
@@ -46,7 +46,7 @@ def BL(power = 100):
         out = "d"
     elif (power < 0):
         out = "D"
-    out = out + str(abs(power))
+    out = str(abs(power)) + out
     print(out)
     return
 
