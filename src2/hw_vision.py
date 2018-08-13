@@ -1,9 +1,24 @@
 import cv2
 import numpy as np
 import math
+import time
+from picamera.array import PiRGBArray
+from picamera import PiCamera
+import threading
 
 # Calibration
-from calibrationSettings import *
+from calibration import *
+
+camera = PiCamera()
+camera.resolution = (640, 480)
+camera.framerate = 32
+rawCapture = PiRGBArray(camera, size=(640, 480))
+time.sleep(0.1)
+
+cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+cv2.namedWindow('ballmask', cv2.WINDOW_NORMAL)
+cv2.namedWindow('goalymask', cv2.WINDOW_NORMAL)
+cv2.namedWindow('goalgmask', cv2.WINDOW_NORMAL)
 
 def getFrame(_frame):
     frame = cv2.resize(_frame, frameDimensions)
@@ -23,7 +38,6 @@ Outputs: center   - A (x, y) tuple representing the pixel coordinate of the cent
 
          Output is 'None, None' if a ball is not detected
 """
-cv2.namedWindow('ballmask', cv2.WINDOW_NORMAL)
 def findBall(hsvFrame):
     mask = cv2.inRange(hsvFrame, ballLower, ballUpper)
     mask = cv2.dilate(mask, None, iterations=3)
@@ -57,7 +71,6 @@ Outputs: center     - A (x, y) tuple representing the pixel coordinate of the ce
 
          Output is 'None, None' if a goal is not detected
 """
-cv2.namedWindow('goalmask', cv2.WINDOW_NORMAL)
 def findGoal(hsvFrame):
     mask = cv2.inRange(hsvFrame, goalLower, goalUpper)
 
@@ -80,4 +93,34 @@ def findGoal(hsvFrame):
 
     return None, None
     #cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
-    
+
+def start_cv():
+    try:
+        for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+		    frame = getFrame(_frame.array)
+
+            if frame is None:
+			    continue
+
+            overlayedFrame = frame.copy()
+		    hsv = getHSVFrame(frame)
+
+            ballCenter, ballRadius = findBall(hsv)
+            if ballCenter:
+                cv2.circle(overlayedFrame, ballCenter, ballRadius, (0, 255, 0), 2)
+
+            goalCenter, goalDimensions = findGoal(hsv)
+            if goalCenter:
+                cv2.circle(overlayedFrame, goalCenter, 5, (0, 0, 255), 5)
+
+            cv2.imshow('image', overlayedFrame)
+
+		    rawCapture.truncate(0)
+
+    except KeyboardInterrupt:
+        print('Stopping CV')
+        cv2.destroyAllWindows()
+
+t = threading.Thread(target=start_cv)
+t.daemon = True
+t.start()
