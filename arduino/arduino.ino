@@ -58,44 +58,44 @@ void serialInput() {
   if (Serial.available()) {
     char inChar = (char)Serial.read();
 
-    if (inChar == 'a')
-    {
-      motNum = 1;
-      stringComplete = true;
-    }
-    else if (inChar == 'A')
-    {
-      motNum = 11;
-      stringComplete = true;
-    }
-    else if (inChar == 'b')
-    {
-      motNum = 2;
-      stringComplete = true;
-    }
-    else if (inChar == 'B')
-    {
-      motNum = 21;
-      stringComplete = true;
-    }
-    else if (inChar == 'd')
+    if (inChar == 'a') // FRONT LEFT
     {
       motNum = 3;
       stringComplete = true;
     }
-    else if (inChar == 'D')
+    else if (inChar == 'A')
     {
       motNum = 31;
       stringComplete = true;
     }
-    else if (inChar == 'c')
+    else if (inChar == 'b') // FRONT RIGHT
     {
       motNum = 4;
       stringComplete = true;
     }
-    else if (inChar == 'C')
+    else if (inChar == 'B')
     {
       motNum = 41;
+      stringComplete = true;
+    }
+    else if (inChar == 'd') // BACK RIGHT
+    {
+      motNum = 1;
+      stringComplete = true;
+    }
+    else if (inChar == 'D')
+    {
+      motNum = 11;
+      stringComplete = true;
+    }
+    else if (inChar == 'c') // BACK LEFT
+    {
+      motNum = 2;
+      stringComplete = true;
+    }
+    else if (inChar == 'C')
+    {
+      motNum = 21; //41
       stringComplete = true;
     }
     else if (inChar == '\n') //remove if necessary
@@ -214,9 +214,8 @@ void loop()
   if (stringComplete) {
     Serial.print("inputstring:");
     Serial.println(inputString);
-    if (motNum == 1) {
+    if (motNum == 1) { //BACK RIGHT
       flSpeed = map(inputString.toInt(), 0, 100, 0, 255); //Converts 0-100 values to 0-255
-      Serial.println(flSpeed);
       analogWrite(in11, flSpeed);
       analogWrite(in12, 0);
     }
@@ -225,7 +224,7 @@ void loop()
       analogWrite(in11, 0);
       analogWrite(in12, flrSpeed);
     }
-    if (motNum == 2) {
+    if (motNum == 2) { //BACKLEFT
       frSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in13, frSpeed);
       analogWrite(in14, 0);
@@ -235,7 +234,7 @@ void loop()
       analogWrite(in13, 0);
       analogWrite(in14, frrSpeed);
     }
-    if (motNum == 3) {
+    if (motNum == 3) { // FRONT RIGHT
       blSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in21, blSpeed);
       analogWrite(in22, 0);
@@ -245,7 +244,7 @@ void loop()
       analogWrite(in21, 0);
       analogWrite(in22, blrSpeed);
     }
-    if (motNum == 4) {
+    if (motNum == 4) { // FRONT LEFT
       brSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in23, brSpeed);
       analogWrite(in24, 0);
@@ -260,15 +259,6 @@ void loop()
     //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
   }
-
-  analogWrite(in11, flSpeed);
-  analogWrite(in12, flrSpeed);
-  analogWrite(in13, frSpeed);
-  analogWrite(in14, frrSpeed);
-  analogWrite(in21, blSpeed);
-  analogWrite(in22, blrSpeed);
-  analogWrite(in23, brSpeed);
-  analogWrite(in24, brrSpeed);
   
   //serialOutput(); // momentary switch, no ToF
 }
