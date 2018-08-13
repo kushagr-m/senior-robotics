@@ -185,8 +185,8 @@ void setup(){
 void loop() {
   serialInput();
   if (stringComplete) {
-    Serial.print("inputstring:");
-    Serial.println(inputString);
+    //Serial.print("inputstring:");
+    //Serial.println(inputString);
     if (motNum == 1) {
       flSpeed = map(inputString.toInt(), 0, 100, 0, 255); //Converts 0-100 values to 0-255
       analogWrite(in11, flSpeed);
