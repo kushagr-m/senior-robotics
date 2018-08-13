@@ -5,7 +5,7 @@
    output: ToFNumber:Distance (e.g. 1:234 - ToF sensor 1 measures 234mm)
 */
 //#include "Adafruit_VL53L0X.h" // Created by Adafruit - library for ToF
-#include <Wire.h> // to communicate with i2c devices
+//#include <Wire.h> // to communicate with i2c devices - remove comments when ToF installed
 
 // board 1 motor 1
 const int in11 = 12;
@@ -20,14 +20,6 @@ const int in22 = 4;
 const int in23 = 3;
 const int in24 = 2;
 
-// momentary switch stuff for ball detection
-const int sw = 22;
-int swOut = HIGH;
-int swState;
-int lastSwState = LOW;
-unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = 50; // CHANGE TO FIT
-
 //// dual ToF setup (i2c address and shut down pins - to set custom address)
 //#define LOX1_ADDRESS 0x30
 //#define LOX2_ADDRESS 0x31
@@ -40,7 +32,7 @@ unsigned long debounceDelay = 50; // CHANGE TO FIT
 ////Input and Output Data
 //VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
 //VL53L0X_RangingMeasurementData_t measure2;
-int flSpeed = 0; // specific motor speed (percentage)
+int flSpeed = 0; // specific motor speed (percentage) - front left, front left reverse
 int flrSpeed = 0;
 int frSpeed = 0;
 int frrSpeed = 0;
@@ -162,23 +154,6 @@ void serialOutput() {
   //  } else {
   //    Serial.println("out of range");
   //  }
-
-  // debounced momentary switch code - UNTESTED
-  int reading = digitalRead(sw);
-  if (reading != lastSwState) {
-    lastDebounceTime = millis();
-  }
-
-  if (millis() - lastDebounceTime > debounceDelay) {
-    if (reading != swState) {
-      swState = reading;
-      if (swState == HIGH) {
-        swOut = !swOut;
-      }
-    }
-  }
-  Serial.println(swState);
-  lastSwState = reading;
 }
 
 void setup(){
@@ -194,7 +169,7 @@ void setup(){
   //  digitalWrite(SHT_LOX2, LOW);
   //  setID();
 
-  // motor driver outputs and momentary switch input
+  // motor driver outputs
   pinMode(in11, OUTPUT);
   pinMode(in21, OUTPUT);
   pinMode(in12, OUTPUT);
@@ -203,18 +178,16 @@ void setup(){
   pinMode(in23, OUTPUT);
   pinMode(in14, OUTPUT);
   pinMode(in24, OUTPUT);
-  pinMode(sw, INPUT_PULLUP);
 
   stringComplete = false;
 }
 
-void loop()
-{
+void loop() {
   serialInput();
   if (stringComplete) {
     Serial.print("inputstring:");
     Serial.println(inputString);
-    if (motNum == 1) { //BACK RIGHT
+    if (motNum == 1) {
       flSpeed = map(inputString.toInt(), 0, 100, 0, 255); //Converts 0-100 values to 0-255
       analogWrite(in11, flSpeed);
       analogWrite(in12, 0);
@@ -224,7 +197,7 @@ void loop()
       analogWrite(in11, 0);
       analogWrite(in12, flrSpeed);
     }
-    if (motNum == 2) { //BACKLEFT
+    if (motNum == 2) {
       frSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in13, frSpeed);
       analogWrite(in14, 0);
@@ -234,7 +207,7 @@ void loop()
       analogWrite(in13, 0);
       analogWrite(in14, frrSpeed);
     }
-    if (motNum == 3) { // FRONT RIGHT
+    if (motNum == 3) {
       blSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in21, blSpeed);
       analogWrite(in22, 0);
@@ -244,7 +217,7 @@ void loop()
       analogWrite(in21, 0);
       analogWrite(in22, blrSpeed);
     }
-    if (motNum == 4) { // FRONT LEFT
+    if (motNum == 4) {
       brSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in23, brSpeed);
       analogWrite(in24, 0);
@@ -260,5 +233,5 @@ void loop()
     stringComplete = false;
   }
   
-  //serialOutput(); // momentary switch, no ToF
+  //serialOutput(); // remove comments when ToF installed
 }
