@@ -10,19 +10,15 @@
 #include <Adafruit_HMC5883_U.h> // specifically for compass
 
 // board 1 motor 1
-const int en1A = 13;
 const int in11 = 12;
 const int in12 = 11;
 // board 1 motor 2
-const int en1B = 8;
 const int in13 = 10;
 const int in14 = 9;
 // board 2 motor 3
-const int en2A = 6;
 const int in21 = 5;
 const int in22 = 4;
 // board 2 motor 4
-const int en2B = 1;
 const int in23 = 3;
 const int in24 = 2;
 
@@ -48,84 +44,63 @@ Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345); // assign ID to 
 ////Input and Output Data
 //VL53L0X_RangingMeasurementData_t measure1; // ToF measurements
 //VL53L0X_RangingMeasurementData_t measure2;
-int nSpeed = 0; // specific motor speed (percentage)
-int eSpeed = 0;
-int sSpeed = 0;
-int wSpeed = 0;
+int flSpeed = 0; // specific motor speed (percentage)
+int flrSpeed = 0;
+int frSpeed = 0;
+int frrSpeed = 0;
+int blSpeed = 0;
+int blrSpeed = 0;
+int brSpeed = 0;
+int brrSpeed = 0;
 String inputString = ""; // holds serial comm from rPi
 String outputString = ""; // sends ToF data to rPi
 boolean stringComplete = false; 
 int motNum = 1;
 
-void serialInput()
+void serialInput() {
   //Select correct motor driver and motor for control, and wheel direction (i.e. CW or ACW)
-{
    while (Serial.available()) {
     char inChar = (char)Serial.read(); 
     
-    if (inChar == 'FL')
+    if (inChar == 'a')
     {
-      motNum = 1;
-      stringComplete = true;
-
-      if (inChar == '-')
-      {
-        digitalWrite(in11, LOW);
-        digitalWrite(in12, HIGH);
-      }
-      else
-      {
-        digitalWrite(in11, HIGH);
-        digitalWrite(in12, LOW);
-      }
+        motNum = 1;
+        stringComplete = true;
     }
-    else if (inChar == 'FR')
+    else if (inChar == 'A')
     {
-      motNum = 2;
-      stringComplete = true;
-
-      if (inChar == '-')
-      {
-        digitalWrite(in13, LOW);
-        digitalWrite(in14, HIGH);
-      }
-      else
-      {
-        digitalWrite(in13, HIGH);
-        digitalWrite(in14, LOW);
-      }
+        motNum = 11;
+        stringComplete = true;            
     }
-    else if (inChar == 'BL')
+    if (inChar == 'b')
     {
-      motNum = 3;
-      stringComplete = true;
-      
-      if (inChar == '-')
-      {
-        digitalWrite(in21, LOW);
-        digitalWrite(in22, HIGH);
-      }
-      else
-      {
-        digitalWrite(in21, HIGH);
-        digitalWrite(in22, LOW);
-      }
+        motNum = 2;
+        stringComplete = true;
     }
-    else if (inChar == 'BR')
+    else if (inChar == 'B')
     {
-      motNum = 4;
-      stringComplete = true;
-
-      if (inChar == '-')
-      {
-        digitalWrite(in23, LOW);
-        digitalWrite(in24, HIGH);
-      }
-      else
-      {
-        digitalWrite(in23, HIGH);
-        digitalWrite(in24, LOW);
-      }
+        motNum = 21;
+        stringComplete = true;
+    }
+    if (inChar == 'd')
+    {
+        motNum = 3;
+        stringComplete = true;
+    }
+    else if (inChar == 'D')
+    {
+        motNum = 31;
+        stringComplete = true;
+    }
+    if (inChar == 'c')
+    {
+        motNum = 4;
+        stringComplete = true;
+    }
+    else if (inChar == 'C')
+    {
+        motNum = 41;
+        stringComplete = true;
     }
     else if (inChar == '\n') //remove if necessary
     {
@@ -268,10 +243,6 @@ void setup()
 //displaySensorDetails(); // uncomment for debug  
   
   // motor driver outputs and momentary switch input
-  pinMode(en1A, OUTPUT);
-  pinMode(en2A, OUTPUT);
-  pinMode(en1B, OUTPUT);
-  pinMode(en2B, OUTPUT);
   pinMode(in11, OUTPUT);
   pinMode(in21, OUTPUT);
   pinMode(in12, OUTPUT);
@@ -280,7 +251,7 @@ void setup()
   pinMode(in23, OUTPUT);
   pinMode(in14, OUTPUT);
   pinMode(in24, OUTPUT);
-  pinMode(sw, INPUT);
+  pinMode(sw, INPUT_PULLUP);
 }
 
 void loop()
@@ -288,27 +259,47 @@ void loop()
   serialInput();
   if (stringComplete) {
     if (motNum == 1) {
-    nSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
+    flSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
+    flrSpeed = 0;
     }
-    else if (motNum == 2) {
-    eSpeed = map(inputString.toInt(),0,100,0,255);
+    else if (motNum == 11) {
+    flrSpeed = map(inputString.toInt(),0,100,0,255);
+    flSpeed = 0;
     }
-    else if (motNum == 3) {
-    sSpeed = map(inputString.toInt(),0,100,0,255);
+    if (motNum == 2) {
+    frSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
+    frrSpeed = 0;
     }
-    else if (motNum == 4) {
-    wSpeed = map(inputString.toInt(),0,100,0,255);
+    else if (motNum == 21) {
+    frrSpeed = map(inputString.toInt(),0,100,0,255);
+    frSpeed = 0;
+    }
+    if (motNum == 3) {
+    blSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
+    blrSpeed = 0;
+    }
+    else if (motNum == 31) {
+    blrSpeed = map(inputString.toInt(),0,100,0,255);
+    blSpeed = 0;
+    }
+    if (motNum == 4) {
+    brSpeed = map(inputString.toInt(),0,100,0,255); //Converts 0-100 values to 0-255
+    brrSpeed = 0;
+    }
+    else if (motNum == 41) {
+    brrSpeed = map(inputString.toInt(),0,100,0,255);
+    brSpeed = 0;
     }
     
-    analogWrite(en1A, nSpeed);
-    analogWrite(en1B, eSpeed);
-    analogWrite(en2A, sSpeed);
-    analogWrite(en2B, wSpeed);
+    analogWrite(in11, flSpeed);
+    analogWrite(in12, flrSpeed);
+    analogWrite(in13, frSpeed);
+    analogWrite(in14, frrSpeed);
+    analogWrite(in21, blSpeed);
+    analogWrite(in22, blrSpeed);
+    analogWrite(in23, brSpeed);
+    analogWrite(in24, brrSpeed);
     
-    Serial.print(nSpeed); //For testing only! Delete to prevent unnecessary undefined serial comms to rPi
-    Serial.print(eSpeed);
-    Serial.print(sSpeed);
-    Serial.println(wSpeed);
     inputString = "";
     //Add lines to clear xSpeed here if value retention not wanted
     stringComplete = false;
