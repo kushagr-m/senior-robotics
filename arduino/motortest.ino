@@ -33,15 +33,17 @@ void serialInput()
       if(byteIn=='\n'){
         //command finished
         cmd[cmdIndex] = '\0';
-        //Serial.println(cmd);
+        Serial.println(cmd);
         cmdIndex = 0;
         
         if(strcmp(cmd, "FL")  == 0){
           motNum = 1;
           stringComplete = true;
+          Serial.println(FL CW);
         }else if (strcmp(cmd, "FL-")  == 0) {
           motNum = 11;
           stringComplete = true;
+          Serial.println(FL ACW);
         }
         
       }else{
@@ -57,16 +59,16 @@ void setup() {
  inputString.reserve(200);
  outputString.reserve(200);
  Serial.println("set");
-  pinMode(in11, OUTPUT);
-  pinMode(in21, OUTPUT);
-  pinMode(in12, OUTPUT);
-  pinMode(in22, OUTPUT);
-  pinMode(in13, OUTPUT);
-  pinMode(in23, OUTPUT);
-  pinMode(in14, OUTPUT);
-  pinMode(in24, OUTPUT);
+ pinMode(in11, OUTPUT);
+ pinMode(in21, OUTPUT);
+ pinMode(in12, OUTPUT);
+ pinMode(in22, OUTPUT);
+ pinMode(in13, OUTPUT);
+ pinMode(in23, OUTPUT);
+ pinMode(in14, OUTPUT);
+ pinMode(in24, OUTPUT);
   
-  cmdIndex = 0;
+ cmdIndex = 0;
 }
 
 void loop()
@@ -78,8 +80,8 @@ void loop()
     flrSpeed = 0;
     }
     else if (motNum == 11) {
-    flSpeed = map(inputString.toInt(),0,100,0,255);
-    flrSpeed = 0;
+    flrSpeed = map(inputString.toInt(),0,100,0,255);
+    flSpeed = 0;
     }
   }
     
