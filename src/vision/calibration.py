@@ -32,6 +32,8 @@ cv2.createTrackbar('Hmax', 'image', 0, 255, trackbarCallback)
 cv2.createTrackbar('Smax', 'image', 0, 255, trackbarCallback)
 cv2.createTrackbar('Vmax', 'image', 0, 255, trackbarCallback)
 
+cv2.createTrackbar('gamma', 'image', 0, 350, trackbarCallback)
+
 cv2.setTrackbarPos('Hmin', 'image', 0)
 cv2.setTrackbarPos('Hmax', 'image', 255)
 cv2.setTrackbarPos('Smin', 'image', 0)
@@ -62,7 +64,17 @@ def onMouse(event, x, y, flags, params):
         cv2.setTrackbarPos('Smax', 'image', data[1] + autocalibration_tolerance)
         cv2.setTrackbarPos('Vmin', 'image', data[2] - autocalibration_tolerance)
         cv2.setTrackbarPos('Vmax', 'image', data[2] + autocalibration_tolerance)
-cv2.setMouseCallback('original', onMouse)
+# cv2.setMouseCallback('original', onMouse)
+
+def adjust_gamma(image, gamma=1.0):
+	# build a lookup table mapping the pixel values [0, 255] to
+	# their adjusted gamma values
+	invGamma = 1.0 / gamma
+	table = np.array([((i / 255.0) ** invGamma) * 255
+		for i in np.arange(0, 256)]).astype("uint8")
+
+	# apply gamma correction using the lookup table
+	return cv2.LUT(image, table)
 
 for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     frame = _frame.array
@@ -71,9 +83,15 @@ for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port
     if goalCalibration:
         frame = cv2.imread(os.path.dirname(os.path.abspath(__file__)) + '/../../callibyellow.png')
 
-    frame = cv2.resize(frame, (320, 240))
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    hsv = cv2.GaussianBlur(hsv, (5, 5), 0)
+    gamma = cv2.getTrackbarPos('gamma', 'image') / 100
+    if gamma == 0:
+        gamma = 0.1
+
+    frame = adjust_gamma(frame, gamma)
+
+    hsv = cv2.resize(frame, (320, 240))
+    hsv = cv2.cvtColor(hsv, cv2.COLOR_BGR2HSV)
+    hsv = cv2.GaussianBlur(hsv, (5, 5), 5)
 
     hmin = cv2.getTrackbarPos('Hmin', 'image')
     smin = cv2.getTrackbarPos('Smin', 'image')
