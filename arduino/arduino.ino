@@ -92,7 +92,8 @@ void serialInput() {
     }
     else if (inChar == '\n') //remove if necessary
     {
-      stringComplete = true;
+      // stringComplete = true;
+      // motNum = 0;
     }
     else
     {
@@ -226,6 +227,16 @@ void loop() {
       brrSpeed = map(inputString.toInt(), 0, 100, 0, 255);
       analogWrite(in23, 0);
       analogWrite(in24, brrSpeed);
+    }
+    if (motNum == 0) {
+      analogWrite(in11, 0);
+      analogWrite(in12, 0);
+      analogWrite(in13, 0);
+      analogWrite(in14, 0);
+      analogWrite(in21, 0);
+      analogWrite(in22, 0);
+      analogWrite(in23, 0);
+      analogWrite(in24, 0);
     }
 
     inputString = "";

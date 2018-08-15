@@ -141,82 +141,87 @@ def findBGoal(hsvFrame):
 
 	return None, None    
 
-for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-	frame = _frame.array
-	
-
-	if frame is None:
-		print("no frame")
-		continue
-	#cv2.imshow("image", frame)
-	print("frame")
-	
-	overlayedFrame = frame.copy()
-	hsv = getHSVFrame(frame)
-	
-	ball_pos, ball_radius = findBall(hsv)
-	if ball_pos:
-		cv2.circle(overlayedFrame, ball_pos, ball_radius, (0, 255, 0), 2)
-
-	goal_y_pos, goal_y_dimensions = findYGoal(hsv)
-	if goal_y_pos:
-		cv2.circle(overlayedFrame, goal_y_pos, 5, (0, 0, 255), 5)
-
-	goal_b_pos, goal_b_dimensions = findBGoal(hsv)
-	if goal_b_pos:
-		cv2.circle(overlayedFrame, goal_b_pos, 5, (0, 0, 255), 5)
-		
-	#cv2.imshow('image', overlayedFrame)
-
-	key = cv2.waitKey(1)
-	rawCapture.truncate(0)
-
+while True:
 	try:
-		
-		print("compassInitial   {}".format(compassInitial))
-		print("compassReadAngle {}".format(compass.readAngle()))
-		print("compassRelative  {}".format(goalComDir()))
-		print("momentarySwitch  {}".format(momentary.read()))
+		for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+			frame = _frame.array
+			
+			if frame is None:
+				print("no frame")
+				continue
+			#cv2.imshow("image", frame)
+			print("frame")
+			
+			overlayedFrame = frame.copy()
+			hsv = getHSVFrame(frame)
+			
+			ball_pos, ball_radius = findBall(hsv)
+			if ball_pos:
+				cv2.circle(overlayedFrame, ball_pos, ball_radius, (0, 255, 0), 2)
 
-		sleepdur = 0.4
-		"""if botMode == 0:
-			attack()
+			goal_y_pos, goal_y_dimensions = findYGoal(hsv)
+			if goal_y_pos:
+				cv2.circle(overlayedFrame, goal_y_pos, 5, (0, 0, 255), 5)
 
-		elif botMode == 1:
-			defend()"""
+			goal_b_pos, goal_b_dimensions = findBGoal(hsv)
+			if goal_b_pos:
+				cv2.circle(overlayedFrame, goal_b_pos, 5, (0, 0, 255), 5)
+				
+			#cv2.imshow('image', overlayedFrame)
 
-		# Go to ball test
-		print("ballPos {}".format(ball_pos))
+			key = cv2.waitKey(1)
+			rawCapture.truncate(0)
 
-		if ball_pos:
-			if ball_pos[0] < 150:
-				motors.rotateCenter(-1,50)
-				time.sleep(0.2)
+			try:
+				
+				print("compassInitial   {}".format(compassInitial))
+				print("compassReadAngle {}".format(compass.readAngle()))
+				print("compassRelative  {}".format(goalComDir()))
+				print("momentarySwitch  {}".format(momentary.read()))
+
+				sleepdur = 0.4
+				"""if botMode == 0:
+					attack()
+
+				elif botMode == 1:
+					defend()"""
+
+				# Go to ball test
+				print("ballPos {}".format(ball_pos))
+
+				if ball_pos:
+					if ball_pos[0] < 150:
+						motors.rotateCenter(-1,50)
+						time.sleep(0.2)
+						motors.stop()
+						print("left")
+					elif ball_pos[0] > 170:
+						motors.rotateCenter(1,50)
+						time.sleep(0.2)
+						motors.stop()
+						print("right")
+					else:
+						motors.goStraight(50)
+						time.sleep(3)
+						print("straight")
+				else:
+					motors.rotateCenter(-1,50)
+					time.sleep(0.2)
+					motors.stop()
+					time.sleep(0.2)
+
+				"""if ball_pos:
+					if ball_pos[0] < 150:
+						motors.rotateCenter(-1, 10)
+					elif ball_pos[0] > 170:
+						motors.rotateCenter(1, 10)
+					else:
+						motors.goStraight(10)
+				"""
+				print("loop")
+
+			except KeyboardInterrupt:
 				motors.stop()
-				print("left")
-			elif ball_pos[0] > 170:
-				motors.rotateCenter(1,50)
-				time.sleep(0.2)
-				motors.stop()
-				print("right")
-			else:
-				motors.goStraight(50)
-				print("straight")
-		else:
-			motors.rotateCenter(-1,50)
-			time.sleep(0.2)
-			motors.stop()
-			time.sleep(0.2)
 
-		"""if ball_pos:
-			if ball_pos[0] < 150:
-				motors.rotateCenter(-1, 10)
-			elif ball_pos[0] > 170:
-				motors.rotateCenter(1, 10)
-			else:
-				motors.goStraight(10)
-		"""
-		print("loop")
-
-	except KeyboardInterrupt:
-		motors.stop()
+	except:
+		pass

@@ -1,6 +1,6 @@
 import serial
 from time import sleep
-ser = serial.Serial('/dev/ttyACM0',115200) # change to ACM1 if that is the USB port
+ser = serial.Serial('/dev/ttyACM0',115200, write_timeout=0) # change to ACM1 if that is the USB port
 #AMA0
 FLPower = 0
 FRPower = 0
@@ -22,7 +22,7 @@ def FL(power = 100):
 			out = "a"
 		elif (power < 0):
 			out = "A"
-		out = str(abs(power)) + out + "\n"
+		out = str(abs(power)) + out
 		if motorDebug:
 			print(out)
 		ser.write(str.encode(out))
@@ -36,7 +36,7 @@ def FR(power = 100):
 			out = "b"
 		elif (power < 0):
 			out = "B"
-		out = str(abs(power)) + out + "\n"
+		out = str(abs(power)) + out
 		if motorDebug:
 			print(out)
 		ser.write(str.encode(out))
@@ -50,7 +50,7 @@ def BR(power = 100):
 			out = "d"
 		elif (power < 0):
 			out = "D"
-		out = str(abs(power)) + out + "\n"
+		out = str(abs(power)) + out
 		if motorDebug:
 			print(out)
 		ser.write(str.encode(out))
@@ -64,7 +64,7 @@ def BL(power = 100):
 			out = "c"
 		elif (power < 0):
 			out = "C"
-		out = str(abs(power)) + out + "\n"
+		out = str(abs(power)) + out
 		if motorDebug:
 			print(out)
 		ser.write(str.encode(out))
