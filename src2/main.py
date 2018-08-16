@@ -1,7 +1,8 @@
-import hw_motors as motors
+#import hw_motors as motors
+import hw_motors2 as motors
 #from hw_read import *
 
-import hw_compass as compass
+# import hw_compass as compass
 
 import hw_momentary as momentary
 #from hw_vision import *
@@ -22,8 +23,8 @@ botMode = 0
 # 0 = attack
 # 1 = defend
 
-compass.initialise()
-compassInitial = compass.readAngle()
+#compass.initialise()
+#compassInitial = compass.readAngle()
 
 def goalComDir():
 	global compassInitial
@@ -174,9 +175,9 @@ while True:
 
 			try:
 				
-				print("compassInitial   {}".format(compassInitial))
-				print("compassReadAngle {}".format(compass.readAngle()))
-				print("compassRelative  {}".format(goalComDir()))
+				#print("compassInitial   {}".format(compassInitial))
+				#print("compassReadAngle {}".format(compass.readAngle()))
+				#print("compassRelative  {}".format(goalComDir()))
 				print("momentarySwitch  {}".format(momentary.read()))
 
 				sleepdur = 0.4

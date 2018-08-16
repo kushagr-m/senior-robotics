@@ -1,6 +1,7 @@
 import hw_momentary as momentary
 #import hw_vision as vision
-import hw_motors as motors
+#import hw_motors as motors
+import hw_motors2 as motors
 
 def attack():
     #attacker loop
