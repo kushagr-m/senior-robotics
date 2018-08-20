@@ -2,13 +2,13 @@
 - **John:** Schematic design, serial communication, wiring
 - **Elvis:** CAD, hardware construction
 - **Leon:** Component digitisation, hardware construction
-- **Ben:** Hardware construction
+- **Ben:** Hardware construction, component digitisation
 - **Angus:** PCB design, serial communication
 - **Kush:** OpenCV
 
 ## Timeline and Plan:
 - Work out new plate designs _(Weeks 1-2) (13/08 - 26/08)_
-- Work out new components, order and create schematic _(Weeks 1-3) (13/08 - 02/09)_
+- Work out new components, order and create schematic and PCB _(Weeks 1-4) (13/08 - 01/09)_
 - Begin testing of tactics (hardware + software) _(Weeks 2-5) (20/08 - 10/09)_
 - Construct robots, test, and finalise _(Weeks 4-7) (03/09 - 30/09)_
 - Final optimisation _(Weeks 7-8) (24/09 - 07/10)_
