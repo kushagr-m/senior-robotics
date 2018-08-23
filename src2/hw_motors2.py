@@ -4,10 +4,10 @@ from pymata_aio.constants import Constants as PyMataConstants
 
 # Motor pins
 motors = [
-    (12, 11),
-    (10, 9),
-    (5, 4),
-    (3, 2)
+	(5, 4), # FL
+    (3, 2), # FR
+	(10, 9), # BL
+	(12, 11) # BR
 ]
 
 current_power = [ 0, 0, 0, 0 ]

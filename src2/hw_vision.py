@@ -9,7 +9,7 @@ import threading
 # Calibration
 from calibration import *
 
-#camera = PiCamera()
+camera = PiCamera()
 camera.resolution = (640, 480)
 camera.framerate = 32
 rawCapture = PiRGBArray(camera, size=(640, 480))
@@ -17,6 +17,7 @@ time.sleep(0.1)
 
 cv2.namedWindow('image', cv2.WINDOW_NORMAL)
 
+frame = None
 ball_pos = (0, 0)
 ball_radius = 0
 goal_y_pos = (0, 0)
@@ -73,11 +74,12 @@ Outputs: center   - A (x, y) tuple representing the pixel coordinate of the cent
 """
 cv2.namedWindow('ballmask', cv2.WINDOW_NORMAL)
 def findBall(hsvFrame):
+	print("Start find ball")
 	mask = cv2.inRange(hsvFrame, ballLower, ballUpper)
 	mask = cv2.dilate(mask, None, iterations=3)
-
+	print("FB: transformed")
 	image, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	
+	print("FB: countours")
 	if len(contours) > 0:
 		c = max(contours, key=cv2.contourArea)
 		
@@ -85,14 +87,18 @@ def findBall(hsvFrame):
 		(x, y), radius = cv2.minEnclosingCircle(c)
 		center = (int(x), int(y))
 		radius = int(radius)
+		print("FB: Found circle")
 
 		cv2.circle(mask, center, radius, (255, 255, 255), 1)
+		print("FB: Drew circle")
 		cv2.imshow('ballmask', mask)
+		print("FB: Show mask")
 
 		if (area / (math.pi * (radius ** 2))) > 0.75:
 			return center, radius
 	else:
 		cv2.imshow('ballmask', mask)
+		print("FB: No mask")
 	
 	return None, None
 
@@ -127,7 +133,7 @@ def findYGoal(hsvFrame):
 			return center, (w, h)
 
 	return None, None
-	#cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
+	cv2.drawContours(image, contours, -1, (0, 255, 0), 2)
 
 cv2.namedWindow('goalbmask', cv2.WINDOW_NORMAL)
 def findBGoal(hsvFrame):
@@ -163,6 +169,7 @@ def start_cv():
 
 	global camera
 	global rawCapture
+	global frame
 
 	try:
 		for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -174,22 +181,27 @@ def start_cv():
 			print("frame")
 			overlayedFrame = frame.copy()
 			hsv = getHSVFrame(frame)
+			print("getframe")
 			
 			ball_pos, ball_radius = findBall(hsv)
 			if ball_pos:
 				cv2.circle(overlayedFrame, ball_pos, ball_radius, (0, 255, 0), 2)
-
+			print("found ball")
 			goal_y_pos, goal_y_dimensions = findYGoal(hsv)
 			if goal_y_pos:
 				cv2.circle(overlayedFrame, goal_y_pos, 5, (0, 0, 255), 5)
-
+			print("found y")
 			goal_b_pos, goal_b_dimensions = findBGoal(hsv)
 			if goal_b_pos:
 				cv2.circle(overlayedFrame, goal_b_pos, 5, (0, 0, 255), 5)
-				
+			
+			print("preshow")
 			cv2.imshow('image', overlayedFrame)
-
+			print("show")
 			rawCapture.truncate(0)
+			print("prewait")
+			cv2.waitKey(1)
+			print("postwait")
 
 		print("done")
 
@@ -199,6 +211,6 @@ def start_cv():
 
 	print("crash")
 
-# t = threading.Thread(target=start_cv)
-# t.daemon = True
-# t.start()
+t = threading.Thread(target=start_cv)
+t.daemon = True
+t.start()
