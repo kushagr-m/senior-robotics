@@ -53,8 +53,10 @@ inv_gamma = 1.0 / gamma
 gamma_table = np.array([((i / 255.0) ** inv_gamma) * 255
 	for i in np.arange(0, 256)]).astype("uint8")
 
-def getFrame(_frame):
-	frame = cv2.resize(_frame, frameDimensions)
+def getFrame(_frame = None):
+	global frame
+	if _frame is not None:
+		frame = cv2.resize(_frame, frameDimensions)
 	return frame
 
 def getHSVFrame(frame):
@@ -91,13 +93,13 @@ def findBall(hsvFrame):
 
 		cv2.circle(mask, center, radius, (255, 255, 255), 1)
 		print("FB: Drew circle")
-		cv2.imshow('ballmask', mask)
+		#cv2.imshow('ballmask', mask)
 		print("FB: Show mask")
 
 		if (area / (math.pi * (radius ** 2))) > 0.75:
 			return center, radius
 	else:
-		cv2.imshow('ballmask', mask)
+		#cv2.imshow('ballmask', mask)
 		print("FB: No mask")
 	
 	return None, None
@@ -127,7 +129,7 @@ def findYGoal(hsvFrame):
 		ratio = w / h
 		center = (int(x + w / 2), int(y + h / 2))
 
-		cv2.imshow('goalymask', mask)
+		#cv2.imshow('goalymask', mask)
 		#print(ratio)
 		if w > goalMinSize[0] and h > goalMinSize[1] and ratio > goalWidthHeightRatio - 0.5 and ratio < goalWidthHeightRatio + 0.5:
 			return center, (w, h)
@@ -151,7 +153,7 @@ def findBGoal(hsvFrame):
 		ratio = w / h
 		center = (int(x + w / 2), int(y + h / 2))
 
-		cv2.imshow('goalbmask', mask)
+		#cv2.imshow('goalbmask', mask)
 		#print(ratio)
 		if w > goalMinSize[0] and h > goalMinSize[1] and ratio > goalWidthHeightRatio - 0.5 and ratio < goalWidthHeightRatio + 0.5:
 			return center, (w, h)
@@ -169,10 +171,10 @@ def start_cv():
 
 	global camera
 	global rawCapture
-	global frame
 
 	try:
 		for _frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+			global frame
 			frame = getFrame(_frame.array)
 
 			if frame is None:
@@ -196,11 +198,11 @@ def start_cv():
 				cv2.circle(overlayedFrame, goal_b_pos, 5, (0, 0, 255), 5)
 			
 			print("preshow")
-			cv2.imshow('image', overlayedFrame)
+			#cv2.imshow('image', overlayedFrame)
 			print("show")
 			rawCapture.truncate(0)
 			print("prewait")
-			cv2.waitKey(1)
+			#cv2.waitKey(1)
 			print("postwait")
 
 		print("done")
