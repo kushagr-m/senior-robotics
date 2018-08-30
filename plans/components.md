@@ -1,7 +1,7 @@
 ## Components
 - [x] **Raspberry Pi 2 Model B+:** The brains for OpenCV and logic
   - [ ] **Raspberry Pi Camera Board 2:** To see
-  - [ ] **HMC5833 Digital Compass:** To find angle to goal, communicates over i2c
+  - [x] **HMC5833 Digital Compass:** To find angle to goal, communicates over i2c
   - [x] **VL53L0X Time of Flight Sensors:** 4x, to find distance to edges, communicates over i2c
   - [ ] **Momentary Switch:** To detect when ball is in contact with robot when out of camera view
   - [x] **SPST Switch:** To turn off robot, or at least pause the code
