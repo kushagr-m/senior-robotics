@@ -5,7 +5,7 @@
   - [x] **VL53L0X Time of Flight Sensors:** 4x, to find distance to edges, communicates over i2c
   - [ ] **Momentary Switch:** To detect when ball is in contact with robot when out of camera view
   - [x] **SPST Switch:** To turn off robot, or at least pause the code
-  - [ ] **RGB LED:** 2x, for visual status codes (see `/plans/status_codes`) Keyes
+  - [x] **RGB LED:** 2x, for visual status codes (see `/plans/status_codes`) Keyes
 - [x] **Arduino MEGA R3 2560**: Generates PWM signals to control motor drivers, communicates over serial
   - [x] **L298N Dual H-Bridge Motor Driver:** 2x, uses PWM signals to control voltage to motors, has on board 5V regulator
     - [x] **6V 294RPM Motors:** 4x, To move the robot
