@@ -1,0 +1,84 @@
+int val;
+//int rPow = 0;
+//int gPow = 0;
+//int bPow = 0;
+int p;
+bool stringComplete = false;
+
+void setup () { 
+  pinMode (11, OUTPUT);
+  pinMode (10, OUTPUT);
+  pinMode (9, OUTPUT);
+  Serial.begin (9600);
+  stringComplete = false;
+}
+
+
+void red(int p) {
+  analogWrite(11, p);
+  analogWrite(10, 0);
+  analogWrite(9, 0);
+  delay(100);
+}
+
+void yellow(int p) {
+  analogWrite(11, p);
+  analogWrite(10, p);
+  analogWrite(9, 0);
+  delay(100);
+}
+
+void green(int p) {
+  analogWrite(11, 0);
+  analogWrite(10, p);
+  analogWrite(9, 0);
+  delay(100);
+}
+
+void cyan(int p) {
+  analogWrite(11, 0);
+  analogWrite(10, p);
+  analogWrite(9, p);
+  delay(100);
+}
+
+void blue(int p) {
+  analogWrite(11, 0);
+  analogWrite(10, 0);
+  analogWrite(9, p);
+  delay(100);
+}
+
+void magenta(int p) {
+  analogWrite(11, p);
+  analogWrite(10, 0);
+  analogWrite(9, p);
+  delay(100);
+}
+
+void white(int p) {
+  analogWrite(11, p);
+  analogWrite(10, p);
+  analogWrite(9, p);
+  delay(100);
+}
+
+void off() {
+  analogWrite(11, 0);
+  analogWrite(10, 0);
+  analogWrite(9, 0);
+  delay(100);
+}
+
+void loop() {
+  //Select correct motor driver and motor for control, and wheel direction (i.e. CW or ACW)
+  if (Serial.available()) {
+    p = Serial.readStringUntil('\n').toInt();
+    Serial.println(p);
+    blue(p);
+  }
+
+
+    //Add lines to clear xSpeed here if value retention not wanted
+    stringComplete = false;
+  }

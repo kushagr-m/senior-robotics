@@ -1,11 +1,11 @@
 ## Components
 - [x] **Raspberry Pi 2 Model B+:** The brains for OpenCV and logic
   - [ ] **Raspberry Pi Camera Board 2:** To see
-  - [ ] **HMC5833 Digital Compass:** To find angle to goal, communicates over i2c
+  - [x] **HMC5883 Digital Compass:** To find angle to goal, communicates over i2c
   - [x] **VL53L0X Time of Flight Sensors:** 4x, to find distance to edges, communicates over i2c
   - [ ] **Momentary Switch:** To detect when ball is in contact with robot when out of camera view
   - [x] **SPST Switch:** To turn off robot, or at least pause the code
-  - [ ] **RGB LED:** 2x, for visual status codes (see `/plans/status_codes`)
+  - [x] **Keyes KY-016 3-color LED module:** 2x, for visual status codes (see `/plans/status_codes`)
 - [x] **Arduino MEGA R3 2560**: Generates PWM signals to control motor drivers, communicates over serial
   - [x] **L298N Dual H-Bridge Motor Driver:** 2x, uses PWM signals to control voltage to motors, has on board 5V regulator
     - [x] **6V 294RPM Motors:** 4x, To move the robot
