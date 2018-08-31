@@ -2,6 +2,7 @@ from imutils.video import WebcamVideoStream
 import imutils
 import numpy as np
 import cv2
+import picamera
 
 debug = True
 
@@ -11,7 +12,7 @@ medianKey = 15
 def emptyCallback(value):
 	pass
 
-vs = WebcamVideoStream(src=1).start()
+vs = WebcamVideoStream(src=0).start()
 
 def getFrame():
 
