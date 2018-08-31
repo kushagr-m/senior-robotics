@@ -1,8 +1,9 @@
 from imutils.video import WebcamVideoStream
+from imutils.video import pivideostream
+
 import imutils
 import numpy as np
 import cv2
-import picamera
 
 debug = True
 
@@ -13,6 +14,10 @@ def emptyCallback(value):
 	pass
 
 vs = WebcamVideoStream(src=0).start()
+try:
+	frame = vs.read()
+except:
+	vs = pivideostream().start()
 
 def getFrame():
 
