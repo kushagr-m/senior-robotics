@@ -60,6 +60,8 @@ def getFrame(_frame = None):
 	return frame
 
 def getHSVFrame(frame):
+	global frame
+	global hsv
 	hsv = cv2.LUT(frame, gamma_table)
 	hsv = cv2.cvtColor(hsv, cv2.COLOR_BGR2HSV)
 	hsv = cv2.GaussianBlur(hsv, (5, 5), 5)
@@ -74,7 +76,9 @@ Outputs: center   - A (x, y) tuple representing the pixel coordinate of the cent
 
 		 Output is 'None, None' if a ball is not detected
 """
+
 cv2.namedWindow('ballmask', cv2.WINDOW_NORMAL)
+
 def findBall(hsvFrame):
 	print("Start find ball")
 	mask = cv2.inRange(hsvFrame, ballLower, ballUpper)

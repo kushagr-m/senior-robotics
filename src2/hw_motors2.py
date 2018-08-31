@@ -45,15 +45,12 @@ def BL(power):
 def BR(power):
     set_motor(3, power)
 
-# motor helper functions
 def stop():
 	FL(0)
 	FR(0)
 	BR(0)
 	BL(0)
 
-# GO IN A CERTAIN DIRECTION
-# power = between [-100,100]
 def goStraight(power = 100):
 	FR(power)
 	FL(-1*power)
@@ -103,44 +100,26 @@ def goBL(power = 100):
 	BR(-1*power)
 
 def rotateCenter(direction = -1, power = 100):
-
-	# negative is counterclockwise, positive is clockwise
-
 	if direction < 0:
-		#counterclockwise
-		#FR(100)
-		#FL(100)
-		#BR(100)
-		#BL(100)
-		#sleep(0.1)
 		FR(power)
 		FL(power)
 		BR(power)
 		BL(power)
 
 	if direction > 0:
-		#clockwise
-		#FR(-100)
-		#FL(-100)
-		#BR(-100)
-		#BL(-100)
-		#sleep(0.1)
 		FR(-1*power)
 		FL(-1*power)
 		BR(-1*power)
 		BL(-1*power)
 
 def rotateFrAxis(direction = -1, power = 100):
-
 	if direction < 0:
-		#counterclockwise
 		FR(0)
 		FL(0)
 		BR(-1*power)
 		BL(-1*power)
 
 	if direction > 0:
-		#clockwise
 		FR(0)
 		FL(0)
 		BR(power)
