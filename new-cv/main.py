@@ -1,67 +1,85 @@
 from imutils.video import WebcamVideoStream
-from imutils.video import pivideostream
-
 import imutils
 import numpy as np
-import cv2
+import cv2 as cv
 
 debug = True
 
 frameDimensions = 320,240
-medianKey = 15
+medBlurVal = 13
+gaussVal = 13
 
-def emptyCallback(value):
-	pass
+gammaVal = 0.3
 
-vs = WebcamVideoStream(src=0).start()
-try:
-	frame = vs.read()
-except:
-	vs = pivideostream().start()
+webcamSource = 0
 
 def getFrame():
 
-	frame = vs.read()
-	frame = imutils.resize(frame, frameDimensions[0])
+	frame = vs.read() # read the frame
+	frame = imutils.resize(frame, frameDimensions[0]) # resize the frame
 
 	return frame
 
-def processFrame(frame):
-	
-	frame = cv2.medianBlur(frame,medianKey)
+def blurFrame(frame):
+
+	#frame = cv.GaussianBlur(frame,(gaussVal,gaussVal),0) # gaussian blur 
+	frame = cv.medianBlur(frame,medBlurVal) # median blur
+	frame = adjustGamma(frame, gammaVal) # log darken to make extreme colours brighter
 	
 	return frame
 
+def adjustGamma(image, gamma=1.0):
+
+   invGamma = 1.0 / gamma
+   table = np.array([((i / 255.0) ** invGamma) * 255
+      for i in np.arange(0, 256)]).astype("uint8")
+
+   return cv.LUT(image, table)
+
+def empty(input):
+	pass
+
+vs = WebcamVideoStream(src=webcamSource).start()
 while True:
 	
 	raw = getFrame()
+
+	hsv = cv.cvtColor(raw, cv.COLOR_BGR2HSV)
+
+	rgb = blurFrame(raw)
+	hsv = blurFrame(hsv)
+
+	hsvHue,hsvSat,hsvVal = cv.split(hsv)
+	rgbBlue,rgbGreen,rgbRed = cv.split(rgb)
+
+	redmblue = cv.subtract(rgbRed,rgbBlue)
+	rmbmgreen = cv.subtract(redmblue,rgbGreen)
 	
-	hsv = cv2.cvtColor(raw, cv2.COLOR_BGR2HSV)
-
-	rgb = processFrame(raw)
-	hsv = processFrame(hsv)
-
-	hsvHue,hsvSat,hsvVal = cv2.split(hsv)
-	rgbBlue,rgbGreen,rgbRed = cv2.split(rgb)
+	ballMask = cv.inRange(redmblue,150,255)
 
 	if debug:
 
-		cv2.imshow("No processing", raw)
-		cv2.imshow("Processed RGB", rgb)
-		cv2.imshow("Processed HSV", hsv)
+		cv.imshow("No processing", raw)
+		cv.imshow("Processed RGB", rgb)
+		cv.imshow("Processed HSV", hsv)
 
-		cv2.imshow("RGB Red", rgbRed)
-		cv2.imshow("RGB Green", rgbGreen)
-		cv2.imshow("RGB Blue", rgbBlue)
+		cv.imshow("RGB Red", rgbRed)
+		cv.imshow("RGB Green", rgbGreen)
+		cv.imshow("RGB Blue", rgbBlue)
 
-		cv2.imshow("HSV Hue", hsvHue)
-		cv2.imshow("HSV Saturation", hsvSat)
-		cv2.imshow("HSV Value", hsvVal)
 
-		if cv2.waitKey(1) & 0xFF == ord('q'):
+		cv.imshow("HSV Hue", hsvHue)
+		cv.imshow("HSV Saturation", hsvSat)
+		cv.imshow("HSV Value", hsvVal)
+		
+		cv.imshow("red-blue", redmblue)
+		cv.imshow("rb-green", rmbmgreen)
+		cv.imshow("ball inrange", ballMask)
+
+		if cv.waitKey(1) & 0xFF == ord('q'):
 			break
 
 
 # do a bit of cleanup
-cv2.destroyAllWindows()
+cv.destroyAllWindows()
 vs.stop()
