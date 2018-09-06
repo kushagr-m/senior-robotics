@@ -53,6 +53,19 @@ def adjustGamma(image, gamma=1.0):
 
    return cv.LUT(image, table)
 
+def getBallCenter():
+    global ballCenter
+    global frameDimensions
+    
+    if ballCenter is not None:
+        ballX = int(ballCenter[0]-(frameDimensions[0]/2))
+        ballY = int(ballCenter[1]-(frameDimensions[1]/2))
+    
+        return ballX, ballY
+
+    else:
+        return None
+
 initialise(1)
 
 while True:
@@ -73,8 +86,8 @@ while True:
 	# getting the maximum brightness to inRange, using hsvSat as a floor
 	maxVal = cv.minMaxLoc(ballGrayscale, cv.inRange(hsvSat,25,255))[1]
 	
-	# if maxVal < 80, most likely that the ball isn't even in frame
-	if maxVal >= 80:
+	# if maxVal < 50, most likely that the ball isn't even in frame
+	if maxVal >= 50:
 
 		ballMask = cv.inRange(ballGrayscale, (maxVal-50), 255) # converting to a BW mask
 		ballMask = cv.medianBlur(ballMask,17) #	denoise
@@ -93,9 +106,11 @@ while True:
 		ballMask = cv.inRange(ballGrayscale, 255, 255) # converting to a BW mask
 		ballCenter = None
 
+	print("ballCenter =", ballCenter)
+	print("ballCenFxn =", getBallCenter())
+	
 	if debug: #debug outputs
 
-		print("ballCenter =", ballCenter)
 
 		ballMaskRGB = cv.cvtColor(ballMask, cv.COLOR_GRAY2BGR)
 
