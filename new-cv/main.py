@@ -74,7 +74,7 @@ while True:
 		
 		cv.imshow("red-blue", redmblue)
 		cv.imshow("rb-green", rmbmgreen)
-		cv.imshow("ball inrange", ballMask)
+		#cv.imshow("ball inrange", ballMask)
 
 		if cv.waitKey(1) & 0xFF == ord('q'):
 			break
