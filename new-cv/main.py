@@ -19,7 +19,7 @@ def initialise(camera="pi"):
 	
 	if camera != "pi":
 		vs = VideoStream(src=camera).start() # initialise using webcam video camera
-	else:    
+	else:	
 		vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
 
 	sleep(2.0) # give sensor time to warm up
@@ -46,9 +46,6 @@ def adjustGamma(image, gamma=1.0):
 
    return cv.LUT(image, table)
 
-def empty(input):
-	pass
-
 initialise()
 
 while True:
@@ -65,13 +62,18 @@ while True:
 	ballGrayscale = cv.subtract(rgbRed,rgbBlue)
 	
 	(minVal,maxVal,minLoc,maxLoc) = cv.minMaxLoc(ballGrayscale, cv.inRange(hsvSat,25,255))
-	#print(minVal,maxVal,maxLoc)
-
-	ballMask = cv.inRange(ballGrayscale, (maxVal-50), 255)
-	ballMask = cv.medianBlur(ballMask,17)
-
-	moments = cv.moments(ballMask)
-	ballCenter = int(moments["m10"] / moments["m00"]),int(moments["m01"] / moments["m00"])
+	
+	if maxVal >= 80:
+		ballMask = cv.inRange(ballGrayscale, (maxVal-50), 255)
+		ballMask = cv.medianBlur(ballMask,17)
+		moments = cv.moments(ballMask)
+		ballCenter = int(moments["m10"] / moments["m00"]),int(moments["m01"] / moments["m00"])
+			
+	else:
+		ballMask = cv.inRange(ballGrayscale, 255, 255)
+		ballCenter = None
+			
+	print(ballCenter)
 
 	if debug:
 
