@@ -23,11 +23,12 @@ def initialise(camera="pi"):
 
 	vs = VideoStream(src=camera).start() # initialise using webcam video camera
 	sleep(0.1)
-	if vs.read().any() != None:
-		return
-
-	else:
-		vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
+	test = vs.read()
+	try:
+		test[0]
+	        return
+	except:
+	        vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
 
 	sleep(2.0) # give sensor time to warm up
 
