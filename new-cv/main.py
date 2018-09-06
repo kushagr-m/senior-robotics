@@ -11,7 +11,9 @@ gaussVal = 13
 
 gammaVal = 0.3
 
-webcamSource = 0
+webcamSource = 1
+
+dilateKernel = 19,19
 
 def getFrame():
 
@@ -52,10 +54,11 @@ while True:
 	hsvHue,hsvSat,hsvVal = cv.split(hsv)
 	rgbBlue,rgbGreen,rgbRed = cv.split(rgb)
 
-	redmblue = cv.subtract(rgbRed,rgbBlue)
-	rmbmgreen = cv.subtract(redmblue,rgbGreen)
+	ballMaskGray = adjustGamma(cv.subtract(rgbRed,rgbBlue), 0.7)
 	
-	ballMask = cv.inRange(redmblue,150,255)
+	ballMaskBW = cv.inRange(ballMaskGray,150,255)
+
+	ballMaskBW = cv.dilate(ballMaskBW,dilateKernel)
 
 	if debug:
 
@@ -72,9 +75,10 @@ while True:
 		cv.imshow("HSV Saturation", hsvSat)
 		cv.imshow("HSV Value", hsvVal)
 		
-		cv.imshow("red-blue", redmblue)
-		cv.imshow("rb-green", rmbmgreen)
-		#cv.imshow("ball inrange", ballMask)
+		cv.imshow("red-blue", ballMaskGray)
+
+		cv.imshow("ball mask", ballMaskBW)
+		#cv.imshow("ball inrange", ballMaskBW)
 
 		if cv.waitKey(1) & 0xFF == ord('q'):
 			break
