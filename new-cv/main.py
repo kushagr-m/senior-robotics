@@ -26,7 +26,7 @@ def getCamera(camera=1):
 	sleep(0.1)
 	try:
 		vs.read().any()
-		return
+		
 	except:
 		vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
 
@@ -78,16 +78,20 @@ while True:
 	
 
 	# removing the blue channel from the red channel leaves the rough location of the ball
-	ballGrayscale = cv.subtract(rgbRed,rgbBlue)
+	ballRemoveBG = cv.add(rgbBlue,rgbGreen)
+	ballGrayscale = cv.subtract(rgbRed,ballRemoveBG)
 	
 	# getting the maximum brightness to inRange, using hsvSat as a floor
 	hsvSatMask = cv.inRange(hsvSat,25,255)
 	maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
 	
+	hsvHueMask = cv.inRange(hsvHue,0,50)
+	
 	# if maxVal < 80, most likely that the ball isn't even in frame
 	if maxVal >= 80:
 
-		ballMask = cv.inRange(ballGrayscale, (maxVal-50), 255) # converting to a BW mask
+		ballMask = cv.inRange(ballGrayscale, (maxVal-25), 255) # converting to a BW mask
+		ballMask = cv.bitwise_and(ballMask,hsvHueMask)
 		ballMask = cv.dilate(ballMask,cv.getStructuringElement(cv.MORPH_RECT,(13,13))) # dilate to fill gaps when ball is partially obscured
 
 		# get the center of the mask
@@ -101,7 +105,7 @@ while True:
 		ballCenter = int(moments["m10"] / mDenom), int(moments["m01"] / mDenom)
 			
 	else:
-		ballMask = cv.inRange(ballGrayscale, 255, 255) # converting to a BW mask
+		ballMask = cv.inRange(ballGrayscale, 255, 255) # blank screen
 		ballCenter = None
 
 	print("ballCenter =", ballCenter)
