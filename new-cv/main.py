@@ -79,15 +79,17 @@ while True:
 	# splitting to make it easier to use each channel
 	hsvHue,hsvSat,hsvVal = cv.split(hsv)
 	rgbBlue,rgbGreen,rgbRed = cv.split(rgb)
+	
+	hsvSatMask = cv.inRange(hsvSat,25,255)
 
 	# removing the blue channel from the red channel leaves the rough location of the ball
 	ballGrayscale = cv.subtract(rgbRed,rgbBlue)
 	
 	# getting the maximum brightness to inRange, using hsvSat as a floor
-	maxVal = cv.minMaxLoc(ballGrayscale, cv.inRange(hsvSat,25,255))[1]
+	maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
 	
 	# if maxVal < 50, most likely that the ball isn't even in frame
-	if maxVal >= 50:
+	if maxVal >= 80:
 
 		ballMask = cv.inRange(ballGrayscale, (maxVal-50), 255) # converting to a BW mask
 		ballMask = cv.medianBlur(ballMask,17) #	denoise
@@ -120,13 +122,14 @@ while True:
 
 		cv.imshow("No processing", raw)
 		#cv.imshow("Processed RGB", rgb)
-		#cv.imshow("RGB Red", rgbRed)
+		cv.imshow("RGB Red", rgbRed)
 		#cv.imshow("RGB Green", rgbGreen)
-		#cv.imshow("RGB Blue", rgbBlue)
+		cv.imshow("RGB Blue", rgbBlue)
+		cv.imshow("Ball Gray", ballGrayscale)
 		
 		#cv.imshow("Processed HSV", hsv)
 		#cv.imshow("HSV Hue", hsvHue)
-		#cv.imshow("HSV Saturation", hsvSat)
+		cv.imshow("HSV Saturation", hsvSatMask)
 		#cv.imshow("HSV Value", hsvVal)
 		
 		cv.imshow("ball mask", ballMaskRGB)
