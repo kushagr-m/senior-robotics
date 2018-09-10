@@ -1,6 +1,13 @@
 import vision
 import motors
 
+try:
+	import compass
+	import pi
+except ImportError:
+	print("Disabling Pi specific functions")
+	from stubs import *
+
 moveBot = True
 
 print("Started MAIN SCRIPT")
