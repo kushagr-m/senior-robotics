@@ -8,9 +8,9 @@ import os
 cvDebugLevel = 1 # show a cv.imshow output as well as debugging windows (not required for play, disable)
 frameDimensions = 320,240
 
-#if os.name == "posix" and os.environ['DISPLAY']:
+if os.name == "posix" and os.getenv("DISPLAY") is None:
     # Running in a headless session
-    #cvDebugLevel = 0
+    cvDebugLevel = 0
 
 ballCenter = None
 
