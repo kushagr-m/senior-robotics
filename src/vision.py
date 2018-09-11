@@ -67,7 +67,7 @@ def loop():
     hsvHue,hsvSat,hsvVal = cv.split(hsv)
     rgbBlue,rgbGreen,rgbRed = cv.split(rgb)
     
-    # removing the blue channel from the red channel leaves the rough location of the ball
+    # removing the blue channel from the red channel leaves the ROUGH location of the ball
     ballRemoveBG = cv.add(rgbBlue,rgbGreen)
     ballGrayscale = cv.subtract(rgbRed,ballRemoveBG)
     
@@ -75,24 +75,27 @@ def loop():
     hsvSatMask = cv.inRange(hsvSat,25,255)
     maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
     
-    hsvHueMask = cv.inRange(hsvHue,0,50)
+    # creating a 2-bit image using hsvHue to use as a mask for the ball
+    hsvHueMask = cv.inRange(hsvHue,15,40)
     
     # if maxVal < 80, most likely that the ball isn't even in frame
     if maxVal >= 80:
 
         ballMask = cv.inRange(ballGrayscale, (maxVal-25), 255) # converting to a BW mask
-        ballMask = cv.bitwise_and(ballMask,hsvHueMask)
-        ballMask = cv.dilate(ballMask,cv.getStructuringElement(cv.MORPH_RECT,(13,13))) # dilate to fill gaps when ball is partially obscured
+        ballMask = cv.bitwise_and(ballMask,hsvHueMask) # using bitwise_and to mask
 
-        # get the center of the mask
+        # dilate to fill gaps when ball is partially obscured
+        # rectangle is much quicker than ellipse, ballCenter remains similar
+        ballMask = cv.dilate(ballMask,cv.getStructuringElement(cv.MORPH_RECT,(13,13)))
+
+        # get the center of the mask with moments
         moments = cv.moments(ballMask)
 
-        # weird bug: near the edges of the frame, moments["m00"] = 0, throwing a d0 error
         mDenom = moments["m00"]
         if mDenom == 0:
-            mDenom = 1
-
+            mDenom = 1 # weird bug: near the edges of the frame, moments["m00"] = 0, throwing a d0 error
         ballCenter = int(moments["m10"] / mDenom), int(moments["m01"] / mDenom)	
+        
     else:
         ballMask = cv.inRange(ballGrayscale, 255, 255) # blank screen
         ballCenter = None
@@ -100,8 +103,8 @@ def loop():
     print("ballCenter =", ballCenter)
     
     if cvDebugLevel >= 1: #cvDebug outputs
-        ballMaskRGB = cv.cvtColor(ballMask, cv.COLOR_GRAY2BGR) # convert 1bit ballMask to BGR to draw colours on it
-        cv.circle(rgb, ballCenter, 5, (255,0,0), -1) # draw blue dot on raw at ballCenter
+
+        ballMaskRGB = cv.cvtColor(ballMask, cv.COLOR_GRAY2BGR) # convert 2bit ballMask to BGR to draw colours on it
         
         ballMask, ballOutline, hierarchy = cv.findContours(ballMask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_NONE) # get the outline of ballMask
         cv.drawContours(rgb, ballOutline, -1, (0,255,0), 3) # draw outline of ball (0,255,0)
@@ -110,7 +113,6 @@ def loop():
         cv.imshow("Output", rgb)
 
         if cvDebugLevel >= 2:
-            cv.imshow("Processed RGB", rgb)
             cv.imshow("RGB Red", rgbRed)
             cv.imshow("RGB Green", rgbGreen)
             cv.imshow("RGB Blue", rgbBlue)
