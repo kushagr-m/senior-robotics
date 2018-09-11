@@ -5,7 +5,7 @@ import cv2 as cv
 from time import sleep
 import os
 
-cvDebugLevel = 0 # show a cv.imshow output as well as debugging windows (not required for play, disable)
+cvDebugLevel = 1 # show a cv.imshow output as well as debugging windows (not required for play, disable)
 frameDimensions = 320,240
 
 #if os.name == "posix" and os.environ['DISPLAY']:

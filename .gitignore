@@ -2,3 +2,4 @@ src/vision/__pycache__/*
 *.pyc
 .vscode/settings.json
 src/Pipfile
+*.swp

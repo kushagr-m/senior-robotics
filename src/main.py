@@ -18,17 +18,19 @@ try:
             stop = vision.loop()
             if stop:
                     break
-
+            
+            moveBot = pi.momentary()
+            if not moveBot:
+                    motors.stop()
             if moveBot: # motors and shit
-                    centrePadding = 25
+                    centrePadding = 80
                     print(vision.getBallCenter())
 
                     if vision.getBallCenter() is not None:
                             ballXPos = vision.getBallCenter()[0]
 
                             if abs(ballXPos) <= centrePadding:
-                                    #do nothing
-                                    pass
+                                    motors.goStraight(50)
                             elif ballXPos > 0:
                                     motors.rotateCenter(direction = 1, power = 50)
                             elif ballXPos < 0:
