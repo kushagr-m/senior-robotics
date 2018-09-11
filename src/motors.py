@@ -133,3 +133,6 @@ def rotateFrAxis(direction = -1, power = 100):
         FL(0)
         BR(power)
         BL(power)
+        
+def cleanup():
+    stop()

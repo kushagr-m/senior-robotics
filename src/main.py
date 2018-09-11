@@ -2,7 +2,7 @@ import vision
 import motors
 
 try:
-	import compass
+	#import compass
 	import pi
 except ImportError:
 	print("Disabling Pi specific functions")
@@ -10,30 +10,39 @@ except ImportError:
 
 moveBot = True
 
-print("Started MAIN SCRIPT")
+try:
+    
+    print("Started MAIN SCRIPT")
 
-while True:
-	stop = vision.loop()
-	if stop:
-		break
+    while True:
+            stop = vision.loop()
+            if stop:
+                    break
 
-	if moveBot: # motors and shit
-		centrePadding = 25
+            if moveBot: # motors and shit
+                    centrePadding = 25
+                    print(vision.getBallCenter())
 
-		if vision.getBallCenter() is not None:
-			ballXPos = getBallCenter()[0]
+                    if vision.getBallCenter() is not None:
+                            ballXPos = vision.getBallCenter()[0]
 
-			if abs(ballXPos) <= centrePadding:
-				#do nothing
-				pass
-			elif ballXPos > 0:
-				motors.rotateCenter(direction = 1)
-			elif ballXPos < 0:
-				motors.rotateCenter(direction = -1)
+                            if abs(ballXPos) <= centrePadding:
+                                    #do nothing
+                                    pass
+                            elif ballXPos > 0:
+                                    motors.rotateCenter(direction = 1, power = 50)
+                            elif ballXPos < 0:
+                                    motors.rotateCenter(direction = -1, power = 50)
 
-		else:
-			motors.rotateCenter(direction = 1, power = 50)
-			
-# do a bit of cleanup
-vision.cleanup()
-print("Script Ended Cleanly")
+                    else:
+                            pass#motors.rotateCenter(direction = 1, power = 50)
+                            
+    # do a bit of cleanup
+    vision.cleanup()
+    motors.cleanup()
+    print("Script Ended Cleanly")
+    
+except KeyboardInterrupt:
+    vision.cleanup()
+    motors.cleanup()
+    print("Keyboard Interrupt/nCleaned")
