@@ -5,7 +5,7 @@ import cv2 as cv
 from time import sleep
 import os
 
-cvDebugLevel = 1 # show a cv.imshow output as well as debugging windows (not required for play, disable)
+cvDebugLevel = 2 # show a cv.imshow output as well as debugging windows (not required for play, disable)
 frameDimensions = 320,240
 
 if os.name == "posix" and os.getenv("DISPLAY") is None:
@@ -13,6 +13,7 @@ if os.name == "posix" and os.getenv("DISPLAY") is None:
     cvDebugLevel = 0
 
 ballCenter = None
+maxVal = 0
 
 def getCamera(camera=1):
     print("Getting camera")
@@ -60,6 +61,7 @@ def getBallCenter():
 
 def loop():
     global ballCenter
+    global maxVal
 
     rgb = getFrame()
 
@@ -76,15 +78,15 @@ def loop():
     
     # getting the maximum brightness to inRange, using hsvSat as a floor
     hsvSatMask = cv.inRange(hsvSat,25,255)
-    maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
+    newMaxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
     
     # creating a 2-bit image using hsvHue to use as a mask for the ball
     hsvHueMask = cv.inRange(hsvHue,0,50)
     
     # if maxVal < 80, most likely that the ball isn't even in frame
-    if maxVal >= 80:
-
-        ballMask = cv.inRange(ballGrayscale, (maxVal-40), 255) # converting to a BW mask
+    if newMaxVal >= 80:
+        maxVal = max(maxVal, newMaxVal)
+        ballMask = cv.inRange(ballGrayscale, (maxVal-30), 255) # converting to a BW mask
         ballMask = cv.bitwise_and(ballMask,hsvHueMask) # using bitwise_and to mask
 
         # dilate to fill gaps when ball is partially obscured
@@ -104,6 +106,9 @@ def loop():
         ballCenter = None
 
     print("ballCenter =", ballCenter)
+    print(maxVal)
+    # Decay maxVal to make it less restrictive over time
+    maxVal = maxVal * 0.999
     
     if cvDebugLevel >= 1: #cvDebug outputs
 
