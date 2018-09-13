@@ -1,5 +1,6 @@
 import vision
 import motors
+from time import sleep
 
 try:
     #import compass
@@ -13,6 +14,8 @@ moveBot = True
 try:
     print("Started MAIN SCRIPT")
 
+    ballDirection = 1
+    ballLastXPos = 0
     while True:
         stop = vision.loop()
         if stop:
@@ -25,16 +28,21 @@ try:
 
             if vision.getBallCenter() is not None:
                 ballXPos = vision.getBallCenter()[0]
+                ballDirection = -1 if ballLastXPos - ballXPos < 0 else 1
+                ballLastXPos = ballXPos
 
                 if abs(ballXPos) <= centrePadding:
-                    motors.goStraight(50)
+                    motors.stop()
+                    #sleep(0.3)
+                    #motors.goStraight(50)
+                    #sleep(0.3)
                 elif ballXPos > 0:
                     motors.rotateCenter(direction = 1, power = 50)
                 elif ballXPos < 0:
                     motors.rotateCenter(direction = -1, power = 50)
 
             else:
-                pass#motors.rotateCenter(direction = 1, power = 50)
+                motors.rotateCenter(direction = ballDirection, power = 45)
         else:
             motors.stop()
                             

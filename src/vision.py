@@ -5,7 +5,7 @@ import cv2 as cv
 from time import sleep
 import os
 
-cvDebugLevel = 2 # show a cv.imshow output as well as debugging windows (not required for play, disable)
+cvDebugLevel = 1 # show a cv.imshow output as well as debugging windows (not required for play, disable)
 frameDimensions = 320,240
 
 if os.name == "posix" and os.getenv("DISPLAY") is None:
@@ -36,6 +36,7 @@ vs = getCamera()
 def getFrame():
     frame = vs.read() # read the frame
     frame = imutils.resize(frame, frameDimensions[0]) # resize the frame
+    frame = imutils.rotate(frame, 180)
     return frame
 
 def adjustGamma(image, gamma=1.0):
@@ -78,14 +79,14 @@ def loop():
     
     # getting the maximum brightness to inRange, using hsvSat as a floor
     hsvSatMask = cv.inRange(hsvSat,25,255)
-    newMaxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
+    maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
     
     # creating a 2-bit image using hsvHue to use as a mask for the ball
     hsvHueMask = cv.inRange(hsvHue,0,50)
     
     # if maxVal < 80, most likely that the ball isn't even in frame
-    if newMaxVal >= 80:
-        maxVal = max(maxVal, newMaxVal)
+    if maxVal >= 80:
+        #maxVal = max(maxVal, newMaxVal)
         ballMask = cv.inRange(ballGrayscale, (maxVal-30), 255) # converting to a BW mask
         ballMask = cv.bitwise_and(ballMask,hsvHueMask) # using bitwise_and to mask
 
@@ -106,9 +107,10 @@ def loop():
         ballCenter = None
 
     print("ballCenter =", ballCenter)
-    print(maxVal)
+    print("canonical  =", round(maxVal))
+    #print("current    =", newMaxVal)
     # Decay maxVal to make it less restrictive over time
-    maxVal = maxVal * 0.999
+    #maxVal = maxVal * 0.999
     
     if cvDebugLevel >= 1: #cvDebug outputs
 
