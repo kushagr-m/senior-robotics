@@ -1,10 +1,10 @@
 import vision
-import motors
 from time import sleep
 
 try:
     #import compass
     import pi
+    import motors
 except ImportError:
     print("Disabling Pi specific functions")
     from stubs import *

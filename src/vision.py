@@ -4,29 +4,42 @@ import numpy as np
 import cv2 as cv
 from time import sleep
 import os
+import math as maths
+import collections
 
-cvDebugLevel = 1 # show a cv.imshow output as well as debugging windows (not required for play, disable)
+cvDebugLevel = 2 # show a cv.imshow output as well as debugging windows (not required for play, disable)
 frameDimensions = 320,240
+
+rotateFrame = True
+ballCenter = None
+
+queueLength = 32
+
+ballQueue = collections.deque(maxlen=queueLength)
+maxValQueue = collections.deque(maxlen=queueLength)
 
 if os.name == "posix" and os.getenv("DISPLAY") is None:
     # Running in a headless session
     cvDebugLevel = 0
 
-ballCenter = None
-maxVal = 0
+def clearConsole():
+    print('\n'*100)
 
 def getCamera(camera=1):
-    print("Getting camera")
-    
+    global rotateFrame
+    print("Getting camera, argument", camera)
+
+    print("Trying Webcam")
     vs = VideoStream(src=camera).start() # initialise using webcam video camera
-    print("Trying to use Webcam")
+    
     sleep(0.1)
     try:
         vs.read().any()
+        rotateFrame = False
         print("Webcam Success")
     except:
         vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
-        print("Webcam Failed\nUsing PiCamera")
+        print("Webcam Failed","Using PiCamera.",sep='\n')
 
     sleep(2.0) # give sensor time to warm up
 
@@ -36,7 +49,9 @@ vs = getCamera()
 def getFrame():
     frame = vs.read() # read the frame
     frame = imutils.resize(frame, frameDimensions[0]) # resize the frame
-    frame = imutils.rotate(frame, 180)
+    frame = cv.GaussianBlur(frame, (15,15),0)
+    if rotateFrame: 
+        frame = imutils.rotate(frame, 180)
     return frame
 
 def adjustGamma(image, gamma=1.0):
@@ -46,7 +61,16 @@ def adjustGamma(image, gamma=1.0):
 
    return cv.LUT(image, table)
 
+def dist(A,B):
+	x = A[0]
+	y = A[1]
+	a = B[0]
+	b = B[1]
+	dist = maths.sqrt(((x-a)**2)+((y-b)**2))
+	return dist
+
 def cleanup():
+    clearConsole()
     print("Doing Cleanup")
     cv.destroyAllWindows()
     vs.stop()
@@ -62,37 +86,35 @@ def getBallCenter():
 
 def loop():
     global ballCenter
-    global maxVal
+    #queues
+    global ballQueue
+    global maxValQueue
 
     rgb = getFrame()
 
-    # convert to HSV before blurring to reduce RGB interference in HSV
     hsv = cv.cvtColor(rgb, cv.COLOR_BGR2HSV)
-
-    # splitting to make it easier to use each channel
     hsvHue,hsvSat,hsvVal = cv.split(hsv)
     rgbBlue,rgbGreen,rgbRed = cv.split(rgb)
     
     # removing the blue channel from the red channel leaves the ROUGH location of the ball
-    ballRemoveBG = cv.add(rgbBlue,rgbGreen)
-    ballGrayscale = cv.subtract(rgbRed,ballRemoveBG)
+    
+    ballGrayscale = cv.subtract(rgbRed,rgbBlue)
+    ballGrayscale = cv.subtract(ballGrayscale,rgbGreen)
     
     # getting the maximum brightness to inRange, using hsvSat as a floor
     hsvSatMask = cv.inRange(hsvSat,25,255)
     maxVal = cv.minMaxLoc(ballGrayscale, hsvSatMask)[1]
     
-    # creating a 2-bit image using hsvHue to use as a mask for the ball
-    hsvHueMask = cv.inRange(hsvHue,0,50)
+    # creating a mask for the ball
+    hsvHueMask = cv.inRange(hsvHue,0,25)
     
-    # if maxVal < 80, most likely that the ball isn't even in frame
-    if maxVal >= 80:
-        #maxVal = max(maxVal, newMaxVal)
-        ballMask = cv.inRange(ballGrayscale, (maxVal-30), 255) # converting to a BW mask
+    # if maxVal < 70, most likely that the ball isn't even in frame
+    if maxVal >= 75:
+        ballMask = cv.inRange(ballGrayscale, (maxVal-40), 255) # converting to a BW mask
         ballMask = cv.bitwise_and(ballMask,hsvHueMask) # using bitwise_and to mask
 
         # dilate to fill gaps when ball is partially obscured
-        # rectangle is much quicker than ellipse, ballCenter remains similar
-        ballMask = cv.dilate(ballMask,cv.getStructuringElement(cv.MORPH_RECT,(13,13)))
+        ballMask = cv.dilate(ballMask,cv.getStructuringElement(cv.MORPH_ELLIPSE,(19,19)))
 
         # get the center of the mask with moments
         moments = cv.moments(ballMask)
@@ -106,19 +128,71 @@ def loop():
         ballMask = cv.inRange(ballGrayscale, 255, 255) # blank screen
         ballCenter = None
 
-    print("ballCenter =", ballCenter)
-    print("canonical  =", round(maxVal))
-    #print("current    =", newMaxVal)
-    # Decay maxVal to make it less restrictive over time
-    #maxVal = maxVal * 0.999
+    #get circles and shit
+    ballMask, ballOutline, hierarchy = cv.findContours(ballMask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE) # get the outline of ballMask
     
+    yellowGoal = False
+    outlineCenter,outlineRadius = (0,0),0
+    strX,strY,strW,strH = None,None,None,None
+    
+    if ballOutline is not None:
+        try:
+            outlineCenter,outlineRadius = cv.minEnclosingCircle(ballOutline[0])
+            outlineCenter = int(outlineCenter[0]),int(outlineCenter[1])
+            outlineRadius = int(outlineRadius)
+
+            if dist(ballCenter,outlineCenter)>=(2*outlineRadius/3):
+                yellowGoal = True
+        except:
+            pass
+
+        try:
+            strX,strY,strW,strH = cv.boundingRect(ballOutline[0])
+            outlineRect = cv.minAreaRect(ballOutline[0])
+            outlineBox = np.int0(cv.boxPoints(outlineRect))
+
+            if (outlineRadius/strH)>1:
+                yellowGoal = True
+
+            if strW/strH>=1.5:
+                yellowGoal = True
+
+            if strH < outlineRadius * 1.5 or strW < outlineRadius * 1.5:
+                yellowGoal = True
+
+        except:
+            outlineBox = None
+
+
+    if yellowGoal is True:
+        outlineCenter,outlineRadius = (0,0),0
+        strX,strY,strW,strH = None,None,None,None
+        ballCenter = None
+
+    
+    #queueing
+    ballQueue.append(ballCenter)
+    maxValQueue.append(maxVal)
+
     if cvDebugLevel >= 1: #cvDebug outputs
 
         ballMaskRGB = cv.cvtColor(ballMask, cv.COLOR_GRAY2BGR) # convert 2bit ballMask to BGR to draw colours on it
-        
-        ballMask, ballOutline, hierarchy = cv.findContours(ballMask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_NONE) # get the outline of ballMask
+
         cv.drawContours(rgb, ballOutline, -1, (0,255,0), 3) # draw outline of ball (0,255,0)
-        cv.circle(rgb, ballCenter, 3, (255,0,0), -1) # draw dot at ballCenter (255,0,0)
+        cv.circle(rgb, outlineCenter, outlineRadius, (125,255,125), 3)
+
+        if outlineBox is not None: cv.drawContours(ballMaskRGB, [outlineBox],0,(0,0,255),2)
+        if strX: cv.rectangle(ballMaskRGB,(strX,strY),(strX+strW,strY+strH),(255,200,0),2)
+        cv.circle(ballMaskRGB, outlineCenter, outlineRadius, (0,255,0), 3)
+
+        for i in ballQueue:
+            cv.circle(rgb, i, 4, (255,0,0), -1) # draw dot at ballCenter (255,0,0)
+            cv.circle(ballMaskRGB, i, 2, (0,0,255), -1) # draw red dot on ball mask at ballCenter	
+
+        cv.circle(ballMaskRGB, ballCenter, 4, (0,0,255), -1)	
+            
+
+        if ballCenter is not None: cv.putText(ballMaskRGB, str(getBallCenter()),(int(ballCenter[0]+(outlineRadius/90)),int(ballCenter[1]+(outlineRadius/40))),cv.FONT_HERSHEY_PLAIN,(outlineRadius/40)+0.3,(125,125,125),int((outlineRadius/30)+0.3))
 
         cv.imshow("Output", rgb)
 
@@ -130,11 +204,17 @@ def loop():
             
             cv.imshow("Processed HSV", hsv)
             cv.imshow("HSV Hue", hsvHue)
-            cv.imshow("HSV Saturation", hsvSatMask)
+            cv.imshow("HSV Saturation", hsvSat)
             cv.imshow("HSV Value", hsvVal)
             
-            cv.circle(ballMaskRGB, ballCenter, 5, (0,0,255), -1) # draw red dot on ball mask at ballCenter		
             cv.imshow("ball mask", ballMaskRGB)
 
         if cv.waitKey(1) & 0xFF == ord('q'):
             return True
+
+    clearConsole()
+    print("ballCenter =", ballCenter, "maxValue  =", int(maxVal))
+
+while True:
+	ex = loop()
+	if ex: break
