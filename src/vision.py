@@ -2,7 +2,7 @@ from imutils.video import VideoStream
 import imutils
 import numpy as np
 import cv2 as cv
-from time import sleep
+import time
 import os
 import math as maths
 import collections
@@ -18,6 +18,10 @@ queueLength = 32
 ballQueue = collections.deque(maxlen=queueLength)
 maxValQueue = collections.deque(maxlen=queueLength)
 
+frameCount = 0
+fpsTime = time.perf_counter()
+fps = 0
+
 if os.name == "posix" and os.getenv("DISPLAY") is None:
     # Running in a headless session
     cvDebugLevel = 0
@@ -32,7 +36,7 @@ def getCamera(camera=1):
     print("Trying Webcam")
     vs = VideoStream(src=camera).start() # initialise using webcam video camera
     
-    sleep(0.1)
+    time.sleep(0.1)
     try:
         vs.read().any()
         rotateFrame = False
@@ -41,7 +45,7 @@ def getCamera(camera=1):
         vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
         print("Webcam Failed","Using PiCamera.",sep='\n')
 
-    sleep(2.0) # give sensor time to warm up
+    time.sleep(2.0) # give sensor time to warm up
 
     return vs
 vs = getCamera()
@@ -89,6 +93,9 @@ def loop():
     #queues
     global ballQueue
     global maxValQueue
+    global frameCount
+    global fpsTime
+    global fps
 
     rgb = getFrame()
 
@@ -212,9 +219,18 @@ def loop():
         if cv.waitKey(1) & 0xFF == ord('q'):
             return True
 
-    clearConsole()
-    print("ballCenter =", ballCenter, "maxValue  =", int(maxVal))
+    # Update FPS stats
+    frameCount = frameCount + 1
+    if frameCount % 30 == 0:
+        # Recalculate fps every 30 frames
+        currentTime = time.perf_counter()
+        fps = maths.floor(30 / (currentTime - fpsTime))
+        fpsTime = currentTime
 
-while True:
-	ex = loop()
-	if ex: break
+    clearConsole()
+    print("ballCenter =", ballCenter, "maxValue  =", int(maxVal), "fps       =", fps)
+
+if __name__ == '__main__':
+    while True:
+        ex = loop()
+        if ex: break
