@@ -26,29 +26,38 @@ if os.name == "posix" and os.getenv("DISPLAY") is None:
     # Running in a headless session
     cvDebugLevel = 0
 
-def clearConsole():
-    print('\n'*100)
+def getCamera():
+	global rotateFrame
+	rotateFrame = False
+	print("VISION: Initialising Camera...")
 
-def getCamera(camera=1):
-    global rotateFrame
-    print("Getting camera, argument", camera)
+	for i in [1,0]:
+		print("VISION: Trying webcam ",i,"...",sep="")
+		vs = VideoStream(src=i).start()
+		time.sleep(0.1)
+		try:
+			vs.read().any()
+			rotateFrame = False
+			print("VISION: Webcam",i,"successful.")
+			return vs
 
-    print("Trying Webcam")
-    vs = VideoStream(src=camera).start() # initialise using webcam video camera
-    
-    time.sleep(0.1)
-    try:
-        vs.read().any()
-        rotateFrame = False
-        print("Webcam Success")
-    except:
-        vs = VideoStream(usePiCamera=1>0).start() # initialise using picamera
-        print("Webcam Failed","Using PiCamera.",sep='\n')
+		except:
+			print("VISION: Webcam",i,"failed.")
 
-    time.sleep(2.0) # give sensor time to warm up
+	print("VISION: Trying PiCamera...")
+	try:
+		vs = VideoStream(usePiCamera=1>0).start()
+		print("VISION: PiCamera successful.")
+		rotateFrame = True
+		time.sleep(2.0)
+	except:
+		print("VISION: PiCamera Failed.")
+		return False
 
-    return vs
 vs = getCamera()
+if vs is False:
+	print("VISION: Unable to initialise camera. Exiting...")
+	exit()
 
 def getFrame():
     frame = vs.read() # read the frame
@@ -74,7 +83,6 @@ def dist(A,B):
 	return dist
 
 def cleanup():
-    clearConsole()
     print("Doing Cleanup")
     cv.destroyAllWindows()
     vs.stop()
@@ -227,7 +235,6 @@ def loop():
         fps = maths.floor(30 / (currentTime - fpsTime))
         fpsTime = currentTime
 
-    clearConsole()
     print("ballCenter =", ballCenter, "maxValue  =", int(maxVal), "fps       =", fps)
 
 if __name__ == '__main__':
