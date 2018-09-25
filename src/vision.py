@@ -79,8 +79,7 @@ def dist(A,B):
 	y = A[1]
 	a = B[0]
 	b = B[1]
-	dist = maths.sqrt(((x-a)**2)+((y-b)**2))
-	return dist
+	return maths.sqrt(((x-a)**2)+((y-b)**2))
 
 def cleanup():
     print("Doing Cleanup")
@@ -139,16 +138,18 @@ def loop():
             mDenom = 1 # weird bug: near the edges of the frame, moments["m00"] = 0, throwing a d0 error
         ballCenter = int(moments["m10"] / mDenom), int(moments["m01"] / mDenom)	
         
+        #get circles and shit
+        ballMask, ballOutline, hierarchy = cv.findContours(ballMask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE) # get the outline of ballMask
+        
+        yellowGoal = False
+        outlineCenter,outlineRadius = (0,0),0
+        strX,strY,strW,strH = None,None,None,None
+
     else:
         ballMask = cv.inRange(ballGrayscale, 255, 255) # blank screen
         ballCenter = None
+        ballOutline = None
 
-    #get circles and shit
-    ballMask, ballOutline, hierarchy = cv.findContours(ballMask,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE) # get the outline of ballMask
-    
-    yellowGoal = False
-    outlineCenter,outlineRadius = (0,0),0
-    strX,strY,strW,strH = None,None,None,None
     
     if ballOutline is not None:
         try:
@@ -205,8 +206,6 @@ def loop():
             cv.circle(ballMaskRGB, i, 2, (0,0,255), -1) # draw red dot on ball mask at ballCenter	
 
         cv.circle(ballMaskRGB, ballCenter, 4, (0,0,255), -1)	
-            
-
         if ballCenter is not None: cv.putText(ballMaskRGB, str(getBallCenter()),(int(ballCenter[0]+(outlineRadius/90)),int(ballCenter[1]+(outlineRadius/40))),cv.FONT_HERSHEY_PLAIN,(outlineRadius/40)+0.3,(125,125,125),int((outlineRadius/30)+0.3))
 
         cv.imshow("Output", rgb)
