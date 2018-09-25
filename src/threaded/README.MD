@@ -5,7 +5,7 @@ Based on the threading implementation of `imutils`.
 
 # Usage:
 ```python
-from vision import VisionProcess
+from threaded.vision import VisionProcess
 vp = VisionProcess().start(debugLevel=0)
 
 While True: # in the loop
