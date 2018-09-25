@@ -8,7 +8,8 @@ import collections
 
 class VisionProcess:
 	def __init__(self):
-
+		
+		self.noBallDetected = True
 		self.outlineCenter, self.outlineRadius = None,None
 		self.currentBallCenter = None
 		self.stopped = False
@@ -18,7 +19,7 @@ class VisionProcess:
 
 		print('Initialising Vision Process...')
 
-		self.ballCenterQueue = collections.deque()
+		self.ballCenterQueue = collections.deque(maxlen=200)
 
 		for i in [0]:
 
@@ -46,7 +47,7 @@ class VisionProcess:
 
 	def start(self,debugLevel=0):
 		self.debugLevel = debugLevel
-		t = Thread(target=self.Process,args=())
+		t = Thread(target=self.Process,args=(),name='VisionProcess')
 		t.daemon = True
 		t.start()
 		return self
@@ -119,10 +120,11 @@ class VisionProcess:
 
 	def read(self):
 		return (not self.noBallDetected), self.currentBallCenter, self.ballCenterQueue
-	
+
 	def minEnclosing(self):
 		if self.outlineCenter and self.outlineRadius: return self.outlineCenter,self.outlineRadius
 		else: return None,None
 
 	def stop(self):
 		self.stopped = True
+

@@ -6,7 +6,6 @@ vp = VisionProcess().start(debugLevel=0)
 while True:
     try:
         ret, ballCenter, ballCenterQueue = vp.read()
-        print(ballCenterQueue)
         if ballCenter is not None: print(ret, ballCenter)
 
         OutputFrames = vp.OutputFrame()
