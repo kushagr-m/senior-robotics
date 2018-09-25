@@ -8,10 +8,14 @@ vp = VisionProcess().start(debugLevel=0)
 
 ## Usages:
 ```python
-While True:
+While True: # in the loop
 	try: 
 		ret, current, queue = vp.read()
-	exce
+		# more code here
+	except KeyboardInterrupt:
+		break
+
+vp.stop()
 
 ```
 
