@@ -7,45 +7,6 @@
 #define HMC5883L_ADDRESS 0x1E
 #define HMC5883L_DEFAULT_ADDRESS 0x1E
 
-int trigPinX = 11;
-int echoPinX = 12;
-long durationX, cmX;
-
-int trigPinY = 2;
-int echoPinY = 3;
-long durationY, cmY;
-
-void distanceX() {
-  // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
-  // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  digitalWrite(trigPinX, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPinX, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPinX, LOW);
-
-  // Read the signal from the sensor: a HIGH pulse whose
-  // duration is the time (in microseconds) from the sending
-  // of the ping to the reception of its echo off of an object.
-  pinMode(echoPinX, INPUT);
-  durationX = pulseIn(echoPinX, HIGH);
-
-  cmX = (durationX / 2) / 29.1;
-}
-
-void distanceY() {
-  digitalWrite(trigPinY, LOW);
-  delayMicroseconds(5);
-  digitalWrite(trigPinY, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPinY, LOW);
-
-  pinMode(echoPinY, INPUT);
-  durationY = pulseIn(echoPinY, HIGH);
-
-  cmY = (durationY / 2) / 29.1;
-}
-
 void setup() {
   //Initialize Serial and I2C communications
   Serial.begin(9600);
@@ -55,11 +16,6 @@ void setup() {
   Wire.write(0x02); //select mode register
   Wire.write(0x00); //continuous measurement mode
   Wire.endTransmission();
-
-  pinMode(trigPinX, OUTPUT);
-  pinMode(echoPinX, INPUT);
-  pinMode(trigPinY, OUTPUT);
-  pinMode(echoPinY, INPUT);
 }
 
 void loop() {
@@ -89,20 +45,11 @@ void loop() {
   if (z > 32767)
     z = z - 65536;
 
-  distanceX();
-  distanceY();
-
-  Serial.print("x: ");
   Serial.print(x);
-  Serial.print(" | y: ");
+  Serial.print(",");
   Serial.print(y);
-  Serial.print(" | z: ");
+  Serial.print(",");
   Serial.print(z);
-  Serial.print(" || ");
-  Serial.print(cmX);
-  Serial.print("cm | ");
-  Serial.print(cmY);
-  Serial.print("cm");
   Serial.println();
   delay(250);
 }
