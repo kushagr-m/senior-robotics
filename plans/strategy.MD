@@ -1,5 +1,5 @@
 # Strategy
-
+```
 If Ball is in frame 
 	If goal is in front *compass*              (45˚ acceptance each side)
 	Correct angle to center the ball in frame	
@@ -24,3 +24,4 @@ Else
 
 Note:
 Revolution and rotation can be approximated through trial and error
+```
