@@ -8,25 +8,30 @@ import collections
 
 class VisionProcess:
 	def __init__(self):
-		
-		self.noBallDetected = True
-		self.outlineCenter, self.outlineRadius = None,None
-		self.currentBallCenter = None
-		self.stopped = False
-		self.rgb, self.ballGrayscale, self.ballMask, self.hsvMask = None,None,None,None
-		self.vs = None
-		self.rotateFrame = False
 
 		print('Initialising Vision Process...')
+		self.frameDimensions = (320,240) # set frame dimensions
+
+		# initialise variables
+		self.stopped = False
+		self.vs = None
+		self.rotateFrame = False
+		
+		self.noBallDetected = True
+		self.currentBallCenter = None
+		self.relativeBallCenter = None
+
+		self.outlineCenter, self.outlineRadius = None,None
+		self.rgb, self.ballGrayscale, self.ballMask, self.hsvMask = None, None, None, None
 
 		self.ballCenterQueue = collections.deque(maxlen=200)
 
-		for i in [0]:
+		print('VisProc: Getting camera.')
 
+		for i in [2,1,0]:
 			print('VisProc: Trying webcam ',i,'...',sep='')
 			vs = VideoStream(src=i).start()
 			sleep(0.1) # warmup time
-
 			try:
 				vs.read().any()
 				self.vs = vs
@@ -41,19 +46,19 @@ class VisionProcess:
 				self.rotateFrame = True
 				print('VisProc: PiCamera successful.')
 				sleep(2.0)
+				vs.read().any()
 			except:
 				print('VisProc: PiCamera Failed.')
 				raise Exception('No camera found.')
 
-	def start(self,debugLevel=0):
-		self.debugLevel = debugLevel
+	def start(self):
 		t = Thread(target=self.Process,args=(),name='VisionProcess')
 		t.daemon = True
 		t.start()
 		return self
 
 	def GetFrame(self):
-		rgb = imutils.resize(self.vs.read(),(320,240)[0])
+		rgb = imutils.resize(self.vs.read(),self.frameDimensions[0])
 		rgb = cv.GaussianBlur(rgb,(17,17),0)
 		if self.rotateFrame:
 			rgb = imutils.rotate(rgb,180)
@@ -66,8 +71,6 @@ class VisionProcess:
 	def Process(self):
 		while not self.stopped:
 
-			self.noBallDetected = False
-
 			self.rgb, self.hsv = self.GetFrame()
 			rgbB,rgbG,rgbR = cv.split(self.rgb)
 			hsvH,hsvS,hsvV = cv.split(self.hsv)
@@ -77,6 +80,8 @@ class VisionProcess:
 			maxVal = cv.minMaxLoc(self.ballGrayscale, self.hsvMask)[1]
 
 			if maxVal >= 75:
+
+				self.noBallDetected = False
 
 				self.ballMask = cv.bitwise_and(cv.inRange(self.ballGrayscale,(maxVal-45),255),self.hsvMask)
 
@@ -104,22 +109,15 @@ class VisionProcess:
 			else: self.noBallDetected = True
 
 			if self.currentBallCenter is not None:
-				self.ballCenterQueue.append(self.currentBallCenter)
-
-			#print(not self.noBallDetected)
-
-			#if self.noBallDetected:
-				#self.currentBallCenter = None
-
-			# if self.debugLevel>0:
-			# 	self.ShowDebugWindows()
+				self.relativeBallCenter = (int(self.currentBallCenter[0]-(self.frameDimensions[0]/2)), int(self.currentBallCenter[1]-(self.frameDimensions[1]/2)))
+				self.ballCenterQueue.append(self.relativeBallCenter)
 	
 		print('VisProc: Stopped.')
 		self.vs.stop()
 		return
 
 	def read(self):
-		return (not self.noBallDetected), self.currentBallCenter, self.ballCenterQueue
+		return (not self.noBallDetected), self.relativeBallCenter, self.ballCenterQueue
 
 	def minEnclosing(self):
 		if self.outlineCenter and self.outlineRadius: return self.outlineCenter,self.outlineRadius
