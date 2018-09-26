@@ -8,12 +8,12 @@
 
 
 **STL files:**
-  **Original Designs:**
+  Original Designs:
     - Outer Motor mount
     - Innter Motor mounts
     - Camera Mount
     - Dribbler Mount
     
-  **Existing Designs used:**
+  Existing Designs used:
     - Wheel Mount
     - Battery Mount
