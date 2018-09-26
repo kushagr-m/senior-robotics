@@ -1,9 +1,9 @@
 ## Roles and Responsibilities:
-- **John:** Schematic design, serial communication, wiring
+- **John:** Schematic design, serial communication, wiring, compass
 - **Elvis:** CAD, hardware construction
-- **Leon:** Component digitisation, hardware construction
+- **Leon:** Component digitisation, hardware construction, strategy
 - **Ben:** Hardware construction, component digitisation
-- **Angus:** PCB design, serial communication
+- **Angus:** PCB design, serial communication, strategy
 - **Kush:** OpenCV
 
 ## Timeline and Plan:
