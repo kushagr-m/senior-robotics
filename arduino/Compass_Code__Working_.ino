@@ -1,4 +1,4 @@
-// There is no tilt compensation, so make sure compass is aligned correctly, and stable!
+// There is no tilt compensation, so make sure compass is aligned correctly, and stable! Stuff is X, Y, Z
 
 #include <Wire.h>
 
@@ -6,15 +6,12 @@
 #define HMC5883L_DEFAULT_ADDRESS 0x1E
 
 //calibrated_values[3] is the global array where the calibrated data will be placed
-//calibrated_values[3]: [0]=Xc, [1]=Yc, [2]=Zc
 float calibrated_values[3];   
 //transformation(float uncalibrated_values[3]) is the function of the magnetometer data correction 
 //uncalibrated_values[3] is the array of the non calibrated magnetometer data
-//uncalibrated_values[3]: [0]=Xnc, [1]=Ync, [2]=Znc
 void transformation(float uncalibrated_values[3])    
 {
-  //calibration_matrix[3][3] is the transformation matrix
-  //replace M11, M12,..,M33 with your transformation matrix data
+  //calibration_matrix[3][3] is the transformation matrix, REPLACE WITH DATA FROM MAGMASTER
   double calibration_matrix[3][3] = 
   {
     {1.09, -0.048, -0.014},
@@ -22,7 +19,6 @@ void transformation(float uncalibrated_values[3])
     {0.036, 0.021, 1.204}  
   };
   //bias[3] is the bias
-  //replace Bx, By, Bz with your bias data
   double bias[3] = 
   {
     5.684,
@@ -51,7 +47,7 @@ void setup() {
 
 void loop() {
   int x, y, z; //triple axis data
-  float values_from_magnetometer[3]
+  float values_from_magnetometer[3];
 
   //Tell the HMC5883 where to begin reading data
   Wire.beginTransmission(HMC5883L_ADDRESS);
@@ -69,7 +65,7 @@ void loop() {
     y |= Wire.read(); //Y lsb
   }
 
-  // Quick Fix from steelgoose
+  // steelgoose's Signed Values
   if (x > 32767)
     x = x - 65536;
   if (y > 32767)
