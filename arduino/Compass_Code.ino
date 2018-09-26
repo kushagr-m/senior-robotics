@@ -1,12 +1,39 @@
-// There is no tilt compensation, so make sure compass is aligned correctly, and stable! Stuff is X, Y, Z
+/* 
+There is no tilt compensation, so make sure compass is aligned correctly, and stable!
+Stuff is in (x,y,z) format
+Heading is magnetic north, not true north
+
+Thanks to: steelgoose, helscream
+*/
 
 #include <Wire.h>
+#include "compass.h"
 
 #define HMC5883L_ADDRESS 0x1E
 #define HMC5883L_DEFAULT_ADDRESS 0x1E
 
+#define Task_t 10 // Task Time in milli seconds
+int dt=0;
+unsigned long t;
+
+// WORK IN PROGRESS FOR AUTOMATIC CALIBRATION IN SETUP!
+void calibrate(float uncalibrated_values[3])
+{
+  compass_x_offset = 122.17;
+  compass_y_offset = 230.08;
+  compass_z_offset = 389.85;
+  compass_x_gainError = 1.12;
+  compass_y_gainError = 1.13;
+  compass_z_gainError = 1.03;
+  
+  compass_init(2);
+  compass_debug = 1;
+  compass_offset_calibration(3);
+}
+
 //calibrated_values[3] is the global array where the calibrated data will be placed
-float calibrated_values[3];   
+float calibrated_values[3];
+
 //transformation(float uncalibrated_values[3]) is the function of the magnetometer data correction 
 //uncalibrated_values[3] is the array of the non calibrated magnetometer data
 void transformation(float uncalibrated_values[3])    
@@ -65,7 +92,7 @@ void loop() {
     y |= Wire.read(); //Y lsb
   }
 
-  // steelgoose's Signed Values
+  // signed Values
   if (x > 32767)
     x = x - 65536;
   if (y > 32767)
@@ -73,6 +100,21 @@ void loop() {
   if (z > 32767)
     z = z - 65536;
 
+  // NEW STUFF IN PROGRESS, TO BE ADAPTED
+  //t = millis();
+  //float load;
+  //compass_scalled_reading();
+  //Serial.print("x = ");
+  //Serial.println(compass_x_scalled);
+  //Serial.print("y = ");
+  //Serial.println(compass_y_scalled);
+  //Serial.print("z = ");
+  //Serial.println(compass_z_scalled);
+  //compass_heading();
+  //Serial.print ("Heading angle = ");
+  //Serial.print (bearing);
+  //Serial.println(" Degree");
+  
   values_from_magnetometer[0] = x;
   values_from_magnetometer[1] = y;
   values_from_magnetometer[2] = z;
