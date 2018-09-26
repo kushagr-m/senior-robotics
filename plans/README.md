@@ -4,3 +4,6 @@ Please find plans for
 - Schematic and PCB design
 - Plate designs
 - Other stuff
+
+
+Please note that Compass Calibration Data values only for T10 at MHS!
