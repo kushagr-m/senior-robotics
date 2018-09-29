@@ -1,4 +1,4 @@
-// Please ensure compass is fixed to a stable surface and is not tilted in any direction! 
+// Ensure compass is fixed to a stable surface and is not tilted in any direction! 
 #include <Wire.h>
 
 #define compass_address 0x1E
@@ -11,20 +11,12 @@
 #define compass_cal_x_gain 1.1
 #define compass_cal_y_gain 1.12
 
-float compass_x_offset = 0;
-float compass_y_offset = 0;
-float compass_z_offset = 0;
+float compass_x_offset = compass_y_offset = compass_z_offset 0;
 float compass_gain_factor = 1;
-float compass_x_scaled;
-float compass_y_scaled;
-float compass_z_scaled;
-float compass_x_gain_error = 1;
-float compass_y_gain_error = 1;
-float compass_z_gain_error = 1;
+float compass_x_scaled, compass_y_scaled, compass_z_scaled;
+float compass_x_gain_error = compass_y_gain_error = compass_z_gain_error = 1;
 float bearing = 0;
-int compass_x = 0;
-int compass_y = 0;
-int compass_z = 0;
+int compass_x = compass_y = compass_z = 0;
 
 // reads data from compass and updates the global x,y,z co-ordinate variables
 void compass_read() {
@@ -74,7 +66,7 @@ void compass_offset_calibration() {
   compass_y_scaled = compass_y * compass_gain_factor;
   compass_z_scaled = compass_z * compass_gain_factor;
 
-  // Offset = 1160 - Data_positive
+  // Offset = 1160 - '+ve data'
   compass_x_gain_error = (float)compass_XY_excitation / compass_x_scaled;
   compass_y_gain_error = (float)compass_XY_excitation / compass_y_scaled;
   compass_z_gain_error = (float)compass_Z_excitation / compass_z_scaled;
@@ -97,7 +89,7 @@ void compass_offset_calibration() {
   compass_z_scaled = compass_z * compass_gain_factor;
 
 
-  // Taking the average of the offsets
+  // Take average of the offsets
   compass_x_gain_error = (float)((compass_XY_excitation / abs(compass_x_scaled)) + compass_x_gain_error) / 2;
   compass_y_gain_error = (float)((compass_XY_excitation / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
   compass_z_gain_error = (float)((compass_Z_excitation / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
@@ -119,7 +111,7 @@ void compass_offset_calibration() {
 
   //calibration of magnetometer
   //NOTE: make robot do 360 no-scopes 3x without stopping for calibration
-  Serial.println("rotate compass 3x 360 no-scopes");
+  Serial.println("NOTE: rotate compass 3x 360 no-scopes | Remove message after coding movement");
   for (byte i = 0; i < 10; i++) {
     compass_read(); //first few data sets are junk again
   }
@@ -131,7 +123,7 @@ void compass_offset_calibration() {
   float z_min = 4000;
   unsigned long t = millis();
 
-  while (millis() - t <= 30000) {
+  while (millis() - t <= 30000) { //not actually 30s in reality, check!
     compass_read();
     compass_x_scaled = (float)compass_x * compass_gain_factor * compass_x_gain_error;
     compass_y_scaled = (float)compass_y * compass_gain_factor * compass_y_gain_error;
@@ -161,12 +153,13 @@ void compass_offset_calibration() {
   Serial.println(" mG");
 }
 
-// set the magnetometer gain and update the gain_factor\\or variable
+// set magnetometer gain and update the gain_factor variable
 void compass_init(int gain){
   byte gain_reg,mode_reg;
   Wire.beginTransmission(compass_address);
   Wire.write(0x01);
 
+  //refer below if statement for bit configuration for gain_reg
   if (gain == 0){
     gain_reg = 0b00000000;
     compass_gain_factor = 0.73;
@@ -200,8 +193,12 @@ void compass_init(int gain){
     compass_gain_factor= 4.35;
   }
   
-  Wire.write(gain_reg); // bit configuration = g2 g1 g0 0 0 0 0 0, g2 g1 g0 = 0 0 1 for 1.3 guass and 0 1 0 for 1.9 Guass
-  Wire.write(0b00000011);  // Putting the Magnetometer in idle (00 is cont., 01 for single, 11 for idle)
+  Wire.write(gain_reg);
+  /* bit configuration = g2 g1 g0 0 0 0 0 0
+  g2 g1 g0 = 0 0 1 for 1.3 guass
+  g2 g1 g0 = 0 1 0 for 1.9 Guass
+  */
+  Wire.write(0b00000011);  // Put the magnetometer in idle (00 is cont., 01 for single, 11 for idle)
   Wire.endTransmission();
   
   Serial.print("Gain updated to  = ");
@@ -217,7 +214,7 @@ void compass_scaled_reading(){
   compass_z_scaled=compass_z*compass_gain_factor*compass_z_gain_error+compass_z_offset;
 }
 
-//calibrated angle for Melbourne (magnetic declination)
+//calibrated angle to magnetic North for Melbourne (magnetic declination)
 void compass_heading(){
   float declination_angle = 0.202749081; //i.e. 11 degrees 37 arcminutes
   compass_scaled_reading();
@@ -241,6 +238,8 @@ void setup() {
 
 void loop() {
   compass_scaled_reading();
+  
+  //Uncomment below for human readable data
   /*Serial.print("x = ");
   Serial.print(compass_x_scaled);
   Serial.print(" | y = ");
@@ -254,11 +253,24 @@ void loop() {
   Serial.println(" degrees");
   */
 
-  //Uncomment below to use with MagViewer
+  //Uncomment below for data for use with MagViewer
   Serial.print(compass_x_scaled);
   Serial.print(", ");
   Serial.print(compass_y_scaled);
   Serial.print(", ");
   Serial.println(compass_z_scaled);
+  
+  //Uncomment below for pure serial data to be sent
+  /*
+  Serial.print(compass_x_scaled);
+  Serial.print("\n");
+  Serial.print(compass_y_scaled);
+  Serial.print("\n");
+  Serial.print(compass_z_scaled);
+  Serial.print("\n");
+  Serial.print(bearing);
+  Serial.print("\n");
+  */
+  
   delay(250);
 }
