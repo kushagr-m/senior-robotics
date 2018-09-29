@@ -11,10 +11,10 @@
 #define compass_cal_x_gain 1.1
 #define compass_cal_y_gain 1.12
 
-float compass_x_offset = compass_y_offset = compass_z_offset 0;
+float compass_x_offset = 0, compass_y_offset = 0, compass_z_offset 0;
 float compass_gain_factor = 1;
 float compass_x_scaled, compass_y_scaled, compass_z_scaled;
-float compass_x_gain_error = compass_y_gain_error = compass_z_gain_error = 1;
+float compass_x_gain_error = 1, compass_y_gain_error = 1, compass_z_gain_error = 1;
 float bearing = 0;
 int compass_x = compass_y = compass_z = 0;
 
