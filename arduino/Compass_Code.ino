@@ -1,6 +1,14 @@
 // Ensure compass is fixed to a stable surface and is not tilted in any direction! 
 #include <Wire.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
 
+Adafruit_SSD1306 display(-1);  // -1 = no reset pin, since no reset pin on 4-pin model
+#if (SSD1306_LCDHEIGHT != 64)
+#error("Height incorrect, please fix Adafruit_SSD1306.h! (i.e. un/comment correct lines)");
+#endif
+
+#define OLED_ADDR 0x3C
 #define compass_address 0x1E
 #define compass_XY_excitation 1160
 #define compass_Z_excitation 1080
@@ -11,12 +19,20 @@
 #define compass_cal_x_gain 1.1
 #define compass_cal_y_gain 1.12
 
-float compass_x_offset = 0, compass_y_offset = 0, compass_z_offset 0;
+float compass_x_offset = 0;
+float compass_y_offset = 0;
+float compass_z_offset = 0;
 float compass_gain_factor = 1;
-float compass_x_scaled, compass_y_scaled, compass_z_scaled;
-float compass_x_gain_error = 1, compass_y_gain_error = 1, compass_z_gain_error = 1;
+float compass_x_scaled;
+float compass_y_scaled;
+float compass_z_scaled;
+float compass_x_gain_error = 1;
+float compass_y_gain_error = 1;
+float compass_z_gain_error = 1;
 float bearing = 0;
-int compass_x = compass_y = compass_z = 0;
+int compass_x = 0;
+int compass_y = 0;
+int compass_z = 0;
 
 // reads data from compass and updates the global x,y,z co-ordinate variables
 void compass_read() {
@@ -94,12 +110,16 @@ void compass_offset_calibration() {
   compass_y_gain_error = (float)((compass_XY_excitation / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
   compass_z_gain_error = (float)((compass_Z_excitation / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
 
-  Serial.print("x_gain_offset = ");
-  Serial.print(compass_x_gain_error);
-  Serial.print(" | y_gain_offset = ");
-  Serial.print(compass_y_gain_error);
-  Serial.print(" | z_gain_offset = ");
-  Serial.println(compass_z_gain_error);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(1,1);
+  display.print("x_gain_offset = ");
+  display.println(compass_x_gain_error);
+  display.print("y_gain_offset = ");
+  display.println(compass_y_gain_error);
+  display.print("z_gain_offset = ");
+  display.println(compass_z_gain_error);
 
 
   //OFFSET ESTIMATION
@@ -111,7 +131,11 @@ void compass_offset_calibration() {
 
   //calibration of magnetometer
   //NOTE: make robot do 360 no-scopes 3x without stopping for calibration
-  Serial.println("NOTE: rotate compass 3x 360 no-scopes | Remove message after coding movement");
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(18,30);
+  display.println("Calibrating magnetometer...");
   for (byte i = 0; i < 10; i++) {
     compass_read(); //first few data sets are junk again
   }
@@ -144,13 +168,16 @@ void compass_offset_calibration() {
   compass_z_offset = ((z_max - z_min) / 2) - z_max;
 
 
-  Serial.print("Offset x  = ");
-  Serial.print(compass_x_offset);
-  Serial.print(" mG | Offset y  = ");
-  Serial.print(compass_y_offset);
-  Serial.print(" mG | Offset z  = ");
-  Serial.print(compass_z_offset);
-  Serial.println(" mG");
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(1,1);
+  display.print("Offset x  = ");
+  display.println(compass_x_offset);
+  display.print("Offset y  = ");
+  display.println(compass_y_offset);
+  display.print("Offset z  = ");
+  display.println(compass_z_offset);
 }
 
 // set magnetometer gain and update the gain_factor variable
@@ -200,10 +227,14 @@ void compass_init(int gain){
   */
   Wire.write(0b00000011);  // Put the magnetometer in idle (00 is cont., 01 for single, 11 for idle)
   Wire.endTransmission();
-  
-  Serial.print("Gain updated to  = ");
-  Serial.print(compass_gain_factor);
-  Serial.println(" mG/bit");
+
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(10,30);
+  display.print("Gain updated to  = ");
+  display.print(compass_gain_factor);
+  display.println(" mG/bit");
 }
 
 //transformed (scaled) co-ordinate values
@@ -231,8 +262,23 @@ void compass_heading(){
 
 void setup() {
   Serial.begin(9600);
+
+  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(27,30);
+  display.print("Setting magnetometer gain...");
+  display.display();
+
   Wire.begin();
   compass_init(2); //Gain factor 1.22
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(1,30);
+  display.print("Calibrating offset...");
+  display.display();
   compass_offset_calibration();
 }
 
@@ -240,7 +286,8 @@ void loop() {
   compass_scaled_reading();
   
   //Uncomment below for human readable data
-  /*Serial.print("x = ");
+  /*
+  Serial.print("x = ");
   Serial.print(compass_x_scaled);
   Serial.print(" | y = ");
   Serial.print(compass_y_scaled);
@@ -271,6 +318,21 @@ void loop() {
   Serial.print(bearing);
   Serial.print("\n");
   */
-  
+
+  //Display on OLED
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(1,1);
+  display.print("x = ");
+  display.println(compass_x_scaled);
+  display.print("y = ");
+  display.println(compass_y_scaled);
+  display.print("z = ");
+  display.println(compass_z_scaled);
+  display.println();
+  display.print("Heading angle = ");
+  display.println(bearing);
+  display.display();
   delay(250);
 }
