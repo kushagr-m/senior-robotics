@@ -1,72 +1,73 @@
 from threaded.vision import VisionProcess
-from time import sleep
+import time
 import cv2 as cv
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--debug', default=0, type=int, dest='debug_level', help='The debug level to use (0-2). Default is 0.')
-parser.add_argument('-q', '--quiet-mode', default=False, type=bool, dest='quiet_mode', help='if true, doesnt import shit')
+parser.add_argument('-d', '--debug', default=0, type=int, dest='debug_level', help='The debug level to use (0-2). [Default = 0]')
+parser.add_argument('-q', '--quiet-mode', default=False, type=bool, dest='quiet_mode', help='Disables all movement [Default = False]')
+parser.add_argument('-s', '--go-straight', default=False, type=bool, dest='go_straight', help='Go straight if the ball is straight ahead. [Default = False]')
+parser.add_argument('-c', '--center-padding', default=80, type=int, dest='center_padding', help='how many pixels either side of the middle is the ball in the center [Default=80]')
+parser.add_argument('-o', '--out-of-frame', default=False, type=bool, dest='out_of_frame', help='Rotate if the ball is out of frame? [Default=False]')
 args = parser.parse_args()
 
+print('USE ARGUMENTS PLEASE')
+time.sleep(0.2)
+
 DEBUG_LEVEL = args.debug_level
-QUIET = args.quiet_mode
+quiet_mode = args.quiet_mode
 
 try:
-    #import compass
-    if not QUIET:
-        import pi
-        import motors
-    else:
-        print("Disabling Pi specific functions")
-        from stubs import *
-        QUIET = True
-
+	if not quiet_mode: 
+		import motors
+		import pi
+	else:
+		print('Quiet mode was enabled. Disabling Pi-specific functions.')
+		from stubs import *
 except ImportError:
-    print("Disabling Pi specific functions")
-    from stubs import *
+	quiet_mode = True
+	print('Failed to import motors.py and pi.py.\nQuiet mode was enabled. Disabling Pi-specific functions.')
+	from stubs import *
 
+print('Debug level:',debug_level)
+
+# start vision process
 vp = VisionProcess().start()
 
+print('Started main script.')
+
+# calibration stuffs
+ballCenterPadding = args.center_padding
+
 try:
-    print("Started MAIN SCRIPT")
+	
+	while True:
+		ballDetected, ballCenter, queue = vp.read()
+		hsvatBallCenter, currentFPS = vp.readDebug()
+		print(ballDetected,ballCenter,currentFPS)
 
-    moveBot = True
-    ballDirection = 1
-    ballLastXPos = 0
+		if not quiet_mode and pi.momentary():
 
-    if QUIET: moveBot = False
+			if ballDetected:
 
-    while True:
-        ballDetected, ballCenter, queue = vp.read()
-        hsvAtBallCenter, currentFPS = vp.readDebug()
-        print(ballDetected, ballCenter, hsvAtBallCenter[0], currentFPS, 'fps')
-        
-        if not QUIET: moveBot = pi.momentary()
-        if moveBot: # motors and shit
-            centrePadding = 80
+				if abs(ballCenter[0]) <= ballCenterPadding:
+					if args.go_straight:
+						motors.goStraight(60)
+				elif ballCenter[0] > 0:
+					motors.rotateCenter(direction=1,power=60)
+				elif ballCenter[0] < 0:
+					motors.rotateCenter(direction=-1,power=60)
 
-            if ballDetected:
-                ballXPos = ballCenter[0]
-                ballDirection = -1 if ballLastXPos - ballXPos < 0 else 1
-                ballLastXPos = ballXPos
+			elif args.out_of_frame:
+				
+				if queue[-1][0] > 0:
+					motors.rotateCenter(direction=1,power=60)
+				elif queue[-1][0] < 0:
+					motors.rotateCenter(direction=-1,power=60)
 
-                if abs(ballXPos) <= centrePadding:
-                    motors.stop()
-                    #sleep(0.3)
-                    #motors.goStraight(50)
-                    #sleep(0.3)
-                elif ballXPos > 0:
-                    motors.rotateCenter(direction = 1, power = 50)
-                elif ballXPos < 0:
-                    motors.rotateCenter(direction = -1, power = 50)
 
-            else:
-                motors.rotateCenter(direction = ballDirection, power = 45)
-        else:
-            motors.stop()
-        
-        # Debug
-        if DEBUG_LEVEL > 0:
+		# DEBUG
+		if DEBUG_LEVEL > 0:
             OutputFrames = vp.OutputFrame()
             outlineCenter, outlineRadius = vp.minEnclosing()
 
@@ -76,10 +77,7 @@ try:
                 if ballCenter is not None and ballDetected:
                     absoluteBallCenter = (ballCenter[0] + 160, ballCenter[1] + 120)
                     cv.circle(CameraOutput, absoluteBallCenter, 4, (255,0,0), -1)	
-                    # outlineCenterint = (int(outlineCenter[0]),int(outlineCenter[1]))
-                    # cv.circle(CameraOutput, outlineCenterint, int(outlineRadius), (0,255,0), 3)
-                    #cv.putText(CameraOutput, str(ballCenter),(int(absoluteBallCenter[0]+(outlineRadius/90)),int(absoluteBallCenter[1]+(outlineRadius/40))),cv.FONT_HERSHEY_DUPLEX,(outlineRadius/100)+0.3,(255,255,255),int((outlineRadius/80)+0.3))		
-                
+                    
                 cv.imshow('Camera', CameraOutput)
             
             if DEBUG_LEVEL > 1:
