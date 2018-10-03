@@ -6,7 +6,7 @@ vp = VisionProcess().start(debugLevel=0)
 while True:
     try:
         ret, ballCenter, ballCenterQueue = vp.read()
-        if ballCenter is not None: print(ret, ballCenter)
+        if ballCenter is not None and ballCenter != ballCenterQueue[-2]: print(ret, ballCenter)
 
         OutputFrames = vp.OutputFrame()
         outlineCenter, outlineRadius = vp.minEnclosing()

@@ -5,14 +5,22 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--debug', default=0, type=int, dest='debug_level', help='The debug level to use (0-2). Default is 0.')
+parser.add_argument('-q', '--quiet-mode', default=False, type=bool, dest='quiet_mode', help='if true, doesnt import shit')
 args = parser.parse_args()
 
 DEBUG_LEVEL = args.debug_level
+QUIET = args.quiet_mode
 
 try:
     #import compass
-    import pi
-    import motors
+    if not QUIET:
+        import pi
+        import motors
+    else:
+        print("Disabling Pi specific functions")
+        from stubs import *
+        QUIET = True
+
 except ImportError:
     print("Disabling Pi specific functions")
     from stubs import *
@@ -26,11 +34,14 @@ try:
     ballDirection = 1
     ballLastXPos = 0
 
+    if QUIET: moveBot = False
+
     while True:
         ballDetected, ballCenter, queue = vp.read()
-        print(ballDetected, ballCenter)
+        hsvAtBallCenter, currentFPS = vp.readDebug()
+        print(ballDetected, ballCenter, hsvAtBallCenter[0], currentFPS, 'fps')
         
-        moveBot = pi.momentary()
+        if not QUIET: moveBot = pi.momentary()
         if moveBot: # motors and shit
             centrePadding = 80
 
@@ -62,12 +73,12 @@ try:
             if OutputFrames[0] is not None:
                 CameraOutput = OutputFrames[0]
 
-                if ballCenter is not None:
+                if ballCenter is not None and ballDetected:
                     absoluteBallCenter = (ballCenter[0] + 160, ballCenter[1] + 120)
                     cv.circle(CameraOutput, absoluteBallCenter, 4, (255,0,0), -1)	
-                    outlineCenterint = (int(outlineCenter[0]),int(outlineCenter[1]))
-                    cv.circle(CameraOutput, outlineCenterint, int(outlineRadius), (0,255,0), 3)
-                    cv.putText(CameraOutput, str(ballCenter),(int(absoluteBallCenter[0]+(outlineRadius/90)),int(absoluteBallCenter[1]+(outlineRadius/40))),cv.FONT_HERSHEY_DUPLEX,(outlineRadius/100)+0.3,(255,255,255),int((outlineRadius/80)+0.3))		
+                    # outlineCenterint = (int(outlineCenter[0]),int(outlineCenter[1]))
+                    # cv.circle(CameraOutput, outlineCenterint, int(outlineRadius), (0,255,0), 3)
+                    #cv.putText(CameraOutput, str(ballCenter),(int(absoluteBallCenter[0]+(outlineRadius/90)),int(absoluteBallCenter[1]+(outlineRadius/40))),cv.FONT_HERSHEY_DUPLEX,(outlineRadius/100)+0.3,(255,255,255),int((outlineRadius/80)+0.3))		
                 
                 cv.imshow('Camera', CameraOutput)
             
