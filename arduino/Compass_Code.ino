@@ -284,21 +284,6 @@ void setup() {
 
 void loop() {
   compass_scaled_reading();
-  
-  //Uncomment below for human readable data
-  /*
-  Serial.print("x = ");
-  Serial.print(compass_x_scaled);
-  Serial.print(" | y = ");
-  Serial.print(compass_y_scaled);
-  Serial.print(" | z = ");
-  Serial.println(compass_z_scaled);
-  
-  compass_heading();
-  Serial.print("Heading angle = ");
-  Serial.print(bearing);
-  Serial.println(" degrees");
-  */
 
   //Uncomment below for data for use with MagViewer
   Serial.print(compass_x_scaled);
