@@ -1,17 +1,6 @@
 // Ensure compass is fixed to a stable surface and is not tilted in any direction! 
 #include <Wire.h>
 
-#define OLED_ADDR 0x3C
-#define compass_address 0x1E
-#define compass_XY_excitation 1160
-#define compass_Z_excitation 1080
-#define compass_rad2deg 57.296
-
-#define compass_cal_x_offset 116
-#define compass_cal_y_offset  225
-#define compass_cal_x_gain 1.1
-#define compass_cal_y_gain 1.12
-
 float compass_x_offset = 0;
 float compass_y_offset = 0;
 float compass_z_offset = 0;
@@ -29,11 +18,11 @@ int compass_z = 0;
 
 // reads data from compass and updates the global x,y,z co-ordinate variables
 void compass_read() {
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x02);
   Wire.write(0b10000001); //00 for continuous mode, 01 for single
   Wire.endTransmission();
-  Wire.requestFrom(compass_address, 6);
+  Wire.requestFrom(0x1E, 6);
 
   if (6 <= Wire.available()) {
     compass_x = Wire.read() << 8 | Wire.read();
@@ -49,7 +38,7 @@ void compass_offset_calibration() {
   */
   //GAIN OFFSET ESTIMATION
   //Configure control register for +ve bias
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01110001);
   /* format: 0 A A DO2 DO1 DO0 MS1 MS2
@@ -76,13 +65,13 @@ void compass_offset_calibration() {
   compass_z_scaled = compass_z * compass_gain_factor;
 
   // Offset = 1160 - '+ve data'
-  compass_x_gain_error = (float)compass_XY_excitation / compass_x_scaled;
-  compass_y_gain_error = (float)compass_XY_excitation / compass_y_scaled;
-  compass_z_gain_error = (float)compass_Z_excitation / compass_z_scaled;
+  compass_x_gain_error = (float)1160 / compass_x_scaled;
+  compass_y_gain_error = (float)1160 / compass_y_scaled;
+  compass_z_gain_error = (float)1080 / compass_z_scaled;
 
 
   // Configure control register for -ve bias mode
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01110010); //refer to table of bit configurations above
   Wire.endTransmission();
@@ -99,13 +88,13 @@ void compass_offset_calibration() {
 
 
   // Take average of the offsets
-  compass_x_gain_error = (float)((compass_XY_excitation / abs(compass_x_scaled)) + compass_x_gain_error) / 2;
-  compass_y_gain_error = (float)((compass_XY_excitation / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
-  compass_z_gain_error = (float)((compass_Z_excitation / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
+  compass_x_gain_error = (float)((1160 / abs(compass_x_scaled)) + compass_x_gain_error) / 2;
+  compass_y_gain_error = (float)((1160 / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
+  compass_z_gain_error = (float)((1080 / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
 
   //OFFSET ESTIMATION
   // Configure control register for normal mode
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01111000); //just look up twice kek
   Wire.endTransmission();
@@ -146,7 +135,7 @@ void compass_offset_calibration() {
 // set magnetometer gain and update the gain_factor variable - DO NOT SIMPLIFY, CHANGE IF NEEDED
 void compass_init(int gain){
   byte gain_reg,mode_reg;
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x01);
 
   //refer below if statement for bit configuration for gain_reg
@@ -205,9 +194,9 @@ void compass_heading(){
   float declination_angle = 0.202749081; //i.e. 11 degrees 37 arcminutes
   compass_scaled_reading();
   if (compass_y_scaled>0){
-    bearing = (90-atan(compass_x_scaled/compass_y_scaled)*compass_rad2deg) + declination_angle;
+    bearing = (90-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
   }else if (compass_y_scaled<0){
-    bearing = (270-atan(compass_x_scaled/compass_y_scaled)*compass_rad2deg) + declination_angle;
+    bearing = (270-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
   }else if (compass_y_scaled==0 & compass_x_scaled<0){
     bearing = 180 + declination_angle;
   }else{
