@@ -37,7 +37,7 @@ vp = VisionProcess().start()
 print('Started main script.')
 
 # calibration stuffs
-ballCenterPadding = args.center_padding
+ballCenterPadding = 130 #args.center_padding
 
 try:
 	
@@ -52,22 +52,22 @@ try:
 				if ballDetected is True:
 
 					if abs(ballCenter[0]) <= ballCenterPadding:
-						if args.go_straight:
+						if args.go_straight or True:
 							motors.goStraight(60)
 					elif ballCenter[0] > 0:
-						#motors.rotateCenter(direction=1,power=60)
-						motors.goRight(60)
+						motors.rotateCenter(direction=1,power=60)
+						#motors.goRight(60)
 					elif ballCenter[0] < 0:
-						#motors.rotateCenter(direction=-1,power=60)
-						motors.goLeft(60)
-				elif args.out_of_frame:
+						motors.rotateCenter(direction=-1,power=60)
+						#motors.goLeft(60)
+				elif args.out_of_frame or True:
 					if len(queue) != 0:
 						if queue[-1][0] > 0:
 							motors.rotateCenter(direction=1,power=60)
-							motors.goBR(60)
+							#motors.goBR(60)
 						elif queue[-1][0] <= 0:
 							motors.rotateCenter(direction=-1,power=60)
-							motors.goBL(60)
+							#motors.goBL(60)
 					else:
 						motors.rotateCenter(direction=1,power=60)
 				else:

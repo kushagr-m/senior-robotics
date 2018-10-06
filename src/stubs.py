@@ -1,8 +1,21 @@
 from enum import Enum
 
 class Compass:
-    def readAngle(self):
+    def heading(self):
         return 0
+    def difference(a, b, direction=1):
+        if direction == 1:
+            # Turning clockwise
+            if b > a:
+                return b - a
+            else:
+                return 360 - a + b
+        else:
+            # Turning anticlockwise
+            if b < a:
+                return a - b
+            else:
+                return 360 - b + a
 compass = Compass()
 
 class Pi:

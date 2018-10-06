@@ -13,8 +13,8 @@ motors = [
 
 current_power = [ 0, 0, 0, 0, 0 ]
 
-# board = PyMata3(com_port="/dev/ttyS0")
-board = PyMata3()
+board = PyMata3(com_port="/dev/ttyS0")
+# board = PyMata3()
 
 # Set up motor output pins
 for motor in motors:
@@ -59,24 +59,32 @@ def stop():
 def goStraight(power = 100):
     FR(power)
     FL(-1*power)
-    BR(power)
-    BL(-1*power)
+    # BR(power)
+    BR(0)
+    # BL(-1*power)
+    BL(0)
 
 def goLeft(power = 100):
-    FR(power)
+    # FR(power)
+    FR(0)
     FL(power)
-    BR(-1*power)
+    # BR(-1*power)
+    BR(0)
     BL(-1*power)
 
 def goRight(power = 100):
     FR(-1*power)
-    FL(-1*power)
+    # FL(-1*power)
+    FL(0)
     BR(power)
-    BL(power)
+    # BL(power)
+    BL(0)
 
 def goBack(power = 100):
-    FR(-1*power)
-    FL(power)
+    # FR(-1*power)
+    FR(0)
+    # FL(power)
+    FL(0)
     BR(-1*power)
     BL(power)
 
@@ -106,16 +114,20 @@ def goBL(power = 100):
 
 def rotateCenter(direction = -1, power = 100):
     if direction < 0:
-        FR(power)
+        # FR(power)
+        FR(0)
         FL(power)
         BR(power)
-        BL(power)
+        # BL(power)
+        BL(0)
 
     if direction > 0:
-        FR(-1*power)
+        # FR(-1*power)
+        FR(0)
         FL(-1*power)
         BR(-1*power)
-        BL(-1*power)
+        # BL(-1*power)
+        BL(0)
 
 def rotateFrAxis(direction = -1, power = 100):
     if direction < 0:
@@ -132,3 +144,7 @@ def rotateFrAxis(direction = -1, power = 100):
         
 def cleanup():
     stop()
+
+board.set_pin_mode(0, PyMataConstants.ANALOG)
+def compassHeading():
+    return board.analog_read(0)
