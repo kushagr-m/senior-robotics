@@ -44,8 +44,8 @@
 
 
 /*==============================================================================
- * GLOBAL VARIABLES
- *============================================================================*/
+   GLOBAL VARIABLES
+  ============================================================================*/
 
 #ifdef FIRMATA_SERIAL_FEATURE
 SerialFirmata serialFeature;
@@ -133,8 +133,8 @@ byte wireRead(void)
 }
 
 /*==============================================================================
- * FUNCTIONS
- *============================================================================*/
+   FUNCTIONS
+  ============================================================================*/
 
 void attachServo(byte pin, int minPulse, int maxPulse)
 {
@@ -247,13 +247,13 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
 }
 
 /* -----------------------------------------------------------------------------
- * check all the active digital inputs for change of state, then add any events
- * to the Serial output queue using Serial.print() */
+   check all the active digital inputs for change of state, then add any events
+   to the Serial output queue using Serial.print() */
 void checkDigitalInputs(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
-   * The compiler will apply substantial optimizations if the inputs
-   * to readPort() are compile-time constants. */
+     The compiler will apply substantial optimizations if the inputs
+     to readPort() are compile-time constants. */
   if (TOTAL_PORTS > 0 && reportPINs[0]) outputPort(0, readPort(0, portConfigInputs[0]), false);
   if (TOTAL_PORTS > 1 && reportPINs[1]) outputPort(1, readPort(1, portConfigInputs[1]), false);
   if (TOTAL_PORTS > 2 && reportPINs[2]) outputPort(2, readPort(2, portConfigInputs[2]), false);
@@ -274,8 +274,8 @@ void checkDigitalInputs(void)
 
 // -----------------------------------------------------------------------------
 /* sets the pin mode to the correct state and sets the relevant bits in the
- * two bit-arrays that track Digital I/O and PWM status
- */
+   two bit-arrays that track Digital I/O and PWM status
+*/
 void setPinModeCallback(byte pin, int mode)
 {
   if (Firmata.getPinMode(pin) == PIN_MODE_IGNORE)
@@ -378,11 +378,11 @@ void setPinModeCallback(byte pin, int mode)
 }
 
 /*
- * Sets the value of an individual pin. Useful if you want to set a pin value but
- * are not tracking the digital port state.
- * Can only be used on pins configured as OUTPUT.
- * Cannot be used to enable pull-ups on Digital INPUT pins.
- */
+   Sets the value of an individual pin. Useful if you want to set a pin value but
+   are not tracking the digital port state.
+   Can only be used on pins configured as OUTPUT.
+   Cannot be used to enable pull-ups on Digital INPUT pins.
+*/
 void setPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
@@ -448,7 +448,7 @@ void digitalWriteCallback(byte port, int value)
 
 // -----------------------------------------------------------------------------
 /* sets bits in a bit array (int) to toggle the reporting of the analogIns
- */
+*/
 //void FirmataClass::setAnalogPinReporting(byte pin, byte state) {
 //}
 void reportAnalogCallback(byte analogPin, int value)
@@ -489,8 +489,8 @@ void reportDigitalCallback(byte port, int value)
 }
 
 /*==============================================================================
- * SYSEX-BASED commands
- *============================================================================*/
+   SYSEX-BASED commands
+  ============================================================================*/
 
 void sysexCallback(byte command, byte argc, byte *argv)
 {
@@ -713,8 +713,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
 }
 
 /*==============================================================================
- * SETUP()
- *============================================================================*/
+   SETUP()
+  ============================================================================*/
 
 void systemResetCallback()
 {
@@ -757,13 +757,13 @@ void systemResetCallback()
   servoCount = 0;
 
   /* send digital inputs to set the initial state on the host computer,
-   * since once in the loop(), this firmware will only send on change */
+     since once in the loop(), this firmware will only send on change */
   /*
-  TODO: this can never execute, since no pins default to digital input
+    TODO: this can never execute, since no pins default to digital input
         but it will be needed when/if we support EEPROM stored config
-  for (byte i=0; i < TOTAL_PORTS; i++) {
+    for (byte i=0; i < TOTAL_PORTS; i++) {
     outputPort(i, readPort(i, portConfigInputs[i]), true);
-  }
+    }
   */
   isResetting = false;
 }
@@ -885,73 +885,73 @@ void compass_offset_calibration() {
 }
 
 // set magnetometer gain and update the gain_factor variable - DO NOT SIMPLIFY, CHANGE IF NEEDED
-void compass_init(int gain){
-  byte gain_reg,mode_reg;
+void compass_init(int gain) {
+  byte gain_reg, mode_reg;
   Wire.beginTransmission(0x1E);
   Wire.write(0x01);
 
   //refer below if statement for bit configuration for gain_reg
-  if (gain == 0){
+  if (gain == 0) {
     gain_reg = 0b00000000;
     compass_gain_factor = 0.73;
   }
-  else if (gain == 1){
+  else if (gain == 1) {
     gain_reg = 0b00100000;
-    compass_gain_factor= 0.92;
+    compass_gain_factor = 0.92;
   }
-  else if (gain == 2){
+  else if (gain == 2) {
     gain_reg = 0b01000000;
-    compass_gain_factor= 1.22;
+    compass_gain_factor = 1.22;
   }
-  else if (gain == 3){
+  else if (gain == 3) {
     gain_reg = 0b01100000;
-    compass_gain_factor= 1.52;
+    compass_gain_factor = 1.52;
   }
-  else if (gain == 4){
+  else if (gain == 4) {
     gain_reg = 0b10000000;
-    compass_gain_factor= 2.27;
+    compass_gain_factor = 2.27;
   }
-  else if (gain == 5){
+  else if (gain == 5) {
     gain_reg = 0b10100000;
-    compass_gain_factor= 2.56;
+    compass_gain_factor = 2.56;
   }
-  else if (gain == 6){
+  else if (gain == 6) {
     gain_reg = 0b11000000;
-    compass_gain_factor= 3.03;
+    compass_gain_factor = 3.03;
   }
-  else if (gain == 7){
+  else if (gain == 7) {
     gain_reg = 0b11100000;
-    compass_gain_factor= 4.35;
+    compass_gain_factor = 4.35;
   }
-  
+
   Wire.write(gain_reg);
   /* bit configuration = g2 g1 g0 0 0 0 0 0
-  g2 g1 g0 = 0 0 1 for 1.3 guass
-  g2 g1 g0 = 0 1 0 for 1.9 Guass
+    g2 g1 g0 = 0 0 1 for 1.3 guass
+    g2 g1 g0 = 0 1 0 for 1.9 Guass
   */
   Wire.write(0b00000011);  // Put the magnetometer in idle (00 is cont., 01 for single, 11 for idle)
   Wire.endTransmission();
 }
 
 //transformed (scaled) co-ordinate values
-void compass_scaled_reading(){
+void compass_scaled_reading() {
   compass_read();
-  compass_x_scaled=compass_x*compass_gain_factor*compass_x_gain_error+compass_x_offset;
-  compass_y_scaled=compass_y*compass_gain_factor*compass_y_gain_error+compass_y_offset;
-  compass_z_scaled=compass_z*compass_gain_factor*compass_z_gain_error+compass_z_offset;
+  compass_x_scaled = compass_x * compass_gain_factor * compass_x_gain_error + compass_x_offset;
+  compass_y_scaled = compass_y * compass_gain_factor * compass_y_gain_error + compass_y_offset;
+  compass_z_scaled = compass_z * compass_gain_factor * compass_z_gain_error + compass_z_offset;
 }
 
 //calibrated angle to magnetic North for Melbourne (magnetic declination)
-void compass_heading(){
+void compass_heading() {
   float declination_angle = 0.202749081; //i.e. 11 degrees 37 arcminutes
   compass_scaled_reading();
-  if (compass_y_scaled>0){
-    bearing = (90-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
-  }else if (compass_y_scaled<0){
-    bearing = (270-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
-  }else if (compass_y_scaled==0 & compass_x_scaled<0){
+  if (compass_y_scaled > 0) {
+    bearing = (90 - atan(compass_x_scaled / compass_y_scaled) * 57.296) + declination_angle;
+  } else if (compass_y_scaled < 0) {
+    bearing = (270 - atan(compass_x_scaled / compass_y_scaled) * 57.296) + declination_angle;
+  } else if (compass_y_scaled == 0 & compass_x_scaled < 0) {
     bearing = 180 + declination_angle;
-  }else{
+  } else {
     bearing = declination_angle;
   }
 }
@@ -989,40 +989,24 @@ void setup()
 }
 
 /*==============================================================================
- * LOOP()
- *============================================================================*/
+   LOOP()
+  ============================================================================*/
 void loop()
 {
   compass_scaled_reading();
   compass_heading();
 
-  //Uncomment below for data for use with MagViewer
-  Serial.print(compass_x_scaled);
-  Serial.print(", ");
-  Serial.print(compass_y_scaled);
-  Serial.print(", ");
-  Serial.println(compass_z_scaled);
-  
-  //Uncomment below for pure serial data to be sent
-  /*
-  Serial.print(compass_x_scaled);
-  Serial.print("\n");
-  Serial.print(compass_y_scaled);
-  Serial.print("\n");
-  Serial.print(compass_z_scaled);
-  Serial.print("\n");
-  Serial.print(bearing);
-  Serial.print("\n");
-  */
-  
+  /Data sent over pin 18
+  analogWrite(18, bearing);
+
   byte pin, analogPin;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
-   * FTDI buffer using Serial.print()  */
+     FTDI buffer using Serial.print()  */
   checkDigitalInputs();
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
-   * checking digital inputs.  */
+     checking digital inputs.  */
   while (Firmata.available())
     Firmata.processInput();
 
