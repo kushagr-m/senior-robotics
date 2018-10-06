@@ -1,23 +1,5 @@
 // Ensure compass is fixed to a stable surface and is not tilted in any direction! 
 #include <Wire.h>
-#include <Adafruit_SSD1306.h>
-#include <Adafruit_GFX.h>
-
-Adafruit_SSD1306 display(-1);  // -1 = no reset pin, since no reset pin on 4-pin model
-#if (SSD1306_LCDHEIGHT != 64)
-#error("Height incorrect, please fix Adafruit_SSD1306.h! (i.e. un/comment correct lines)");
-#endif
-
-#define OLED_ADDR 0x3C
-#define compass_address 0x1E
-#define compass_XY_excitation 1160
-#define compass_Z_excitation 1080
-#define compass_rad2deg 57.296
-
-#define compass_cal_x_offset 116
-#define compass_cal_y_offset  225
-#define compass_cal_x_gain 1.1
-#define compass_cal_y_gain 1.12
 
 float compass_x_offset = 0;
 float compass_y_offset = 0;
@@ -36,11 +18,11 @@ int compass_z = 0;
 
 // reads data from compass and updates the global x,y,z co-ordinate variables
 void compass_read() {
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x02);
   Wire.write(0b10000001); //00 for continuous mode, 01 for single
   Wire.endTransmission();
-  Wire.requestFrom(compass_address, 6);
+  Wire.requestFrom(0x1E, 6);
 
   if (6 <= Wire.available()) {
     compass_x = Wire.read() << 8 | Wire.read();
@@ -56,7 +38,7 @@ void compass_offset_calibration() {
   */
   //GAIN OFFSET ESTIMATION
   //Configure control register for +ve bias
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01110001);
   /* format: 0 A A DO2 DO1 DO0 MS1 MS2
@@ -83,13 +65,13 @@ void compass_offset_calibration() {
   compass_z_scaled = compass_z * compass_gain_factor;
 
   // Offset = 1160 - '+ve data'
-  compass_x_gain_error = (float)compass_XY_excitation / compass_x_scaled;
-  compass_y_gain_error = (float)compass_XY_excitation / compass_y_scaled;
-  compass_z_gain_error = (float)compass_Z_excitation / compass_z_scaled;
+  compass_x_gain_error = (float)1160 / compass_x_scaled;
+  compass_y_gain_error = (float)1160 / compass_y_scaled;
+  compass_z_gain_error = (float)1080 / compass_z_scaled;
 
 
   // Configure control register for -ve bias mode
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01110010); //refer to table of bit configurations above
   Wire.endTransmission();
@@ -106,36 +88,18 @@ void compass_offset_calibration() {
 
 
   // Take average of the offsets
-  compass_x_gain_error = (float)((compass_XY_excitation / abs(compass_x_scaled)) + compass_x_gain_error) / 2;
-  compass_y_gain_error = (float)((compass_XY_excitation / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
-  compass_z_gain_error = (float)((compass_Z_excitation / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(1,1);
-  display.print("x_gain_offset = ");
-  display.println(compass_x_gain_error);
-  display.print("y_gain_offset = ");
-  display.println(compass_y_gain_error);
-  display.print("z_gain_offset = ");
-  display.println(compass_z_gain_error);
-
+  compass_x_gain_error = (float)((1160 / abs(compass_x_scaled)) + compass_x_gain_error) / 2;
+  compass_y_gain_error = (float)((1160 / abs(compass_y_scaled)) + compass_y_gain_error) / 2;
+  compass_z_gain_error = (float)((1080 / abs(compass_z_scaled)) + compass_z_gain_error) / 2;
 
   //OFFSET ESTIMATION
   // Configure control register for normal mode
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x00);
   Wire.write(0b01111000); //just look up twice kek
   Wire.endTransmission();
 
   //calibration of magnetometer
-  //NOTE: make robot do 360 no-scopes 3x without stopping for calibration
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(18,30);
-  display.println("Calibrating magnetometer...");
   for (byte i = 0; i < 10; i++) {
     compass_read(); //first few data sets are junk again
   }
@@ -147,7 +111,7 @@ void compass_offset_calibration() {
   float z_min = 4000;
   unsigned long t = millis();
 
-  while (millis() - t <= 30000) { //not actually 30s in reality, check!
+  while (millis() - t <= 5000) { //not actually 30s in reality, check!
     compass_read();
     compass_x_scaled = (float)compass_x * compass_gain_factor * compass_x_gain_error;
     compass_y_scaled = (float)compass_y * compass_gain_factor * compass_y_gain_error;
@@ -166,24 +130,12 @@ void compass_offset_calibration() {
   compass_x_offset = ((x_max - x_min) / 2) - x_max;
   compass_y_offset = ((y_max - y_min) / 2) - y_max;
   compass_z_offset = ((z_max - z_min) / 2) - z_max;
-
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(1,1);
-  display.print("Offset x  = ");
-  display.println(compass_x_offset);
-  display.print("Offset y  = ");
-  display.println(compass_y_offset);
-  display.print("Offset z  = ");
-  display.println(compass_z_offset);
 }
 
-// set magnetometer gain and update the gain_factor variable
+// set magnetometer gain and update the gain_factor variable - DO NOT SIMPLIFY, CHANGE IF NEEDED
 void compass_init(int gain){
   byte gain_reg,mode_reg;
-  Wire.beginTransmission(compass_address);
+  Wire.beginTransmission(0x1E);
   Wire.write(0x01);
 
   //refer below if statement for bit configuration for gain_reg
@@ -227,14 +179,6 @@ void compass_init(int gain){
   */
   Wire.write(0b00000011);  // Put the magnetometer in idle (00 is cont., 01 for single, 11 for idle)
   Wire.endTransmission();
-
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(10,30);
-  display.print("Gain updated to  = ");
-  display.print(compass_gain_factor);
-  display.println(" mG/bit");
 }
 
 //transformed (scaled) co-ordinate values
@@ -250,9 +194,9 @@ void compass_heading(){
   float declination_angle = 0.202749081; //i.e. 11 degrees 37 arcminutes
   compass_scaled_reading();
   if (compass_y_scaled>0){
-    bearing = (90-atan(compass_x_scaled/compass_y_scaled)*compass_rad2deg) + declination_angle;
+    bearing = (90-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
   }else if (compass_y_scaled<0){
-    bearing = (270-atan(compass_x_scaled/compass_y_scaled)*compass_rad2deg) + declination_angle;
+    bearing = (270-atan(compass_x_scaled/compass_y_scaled)*57.296) + declination_angle;
   }else if (compass_y_scaled==0 & compass_x_scaled<0){
     bearing = 180 + declination_angle;
   }else{
@@ -263,27 +207,14 @@ void compass_heading(){
 void setup() {
   Serial.begin(9600);
 
-  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(27,30);
-  display.print("Setting magnetometer gain...");
-  display.display();
-
   Wire.begin();
   compass_init(2); //Gain factor 1.22
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(1,30);
-  display.print("Calibrating offset...");
-  display.display();
   compass_offset_calibration();
 }
 
 void loop() {
   compass_scaled_reading();
+  compass_heading();
 
   //Uncomment below for data for use with MagViewer
   Serial.print(compass_x_scaled);
@@ -303,21 +234,4 @@ void loop() {
   Serial.print(bearing);
   Serial.print("\n");
   */
-
-  //Display on OLED
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(1,1);
-  display.print("x = ");
-  display.println(compass_x_scaled);
-  display.print("y = ");
-  display.println(compass_y_scaled);
-  display.print("z = ");
-  display.println(compass_z_scaled);
-  display.println();
-  display.print("Heading angle = ");
-  display.println(bearing);
-  display.display();
-  delay(250);
 }
