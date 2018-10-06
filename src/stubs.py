@@ -9,6 +9,9 @@ class Pi:
     def momentary(self):
         return False
 
+    def momentary_reset(self):
+        return False
+
     class LEDColours(Enum):
         red = [True, False, False]
         green = [False, True, True]

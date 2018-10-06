@@ -19,8 +19,8 @@ quiet_mode = args.quiet_mode
 
 try:
 	if not quiet_mode: 
-		import motors
 		import pi
+		import motors
 	else:
 		print('Quiet mode was enabled. Disabling Pi-specific functions.')
 		from stubs import *
@@ -29,7 +29,7 @@ except ImportError:
 	print('Failed to import motors.py and pi.py.\nQuiet mode was enabled. Disabling Pi-specific functions.')
 	from stubs import *
 
-print('Debug level:',debug_level)
+print('Debug level:',DEBUG_LEVEL)
 
 # start vision process
 vp = VisionProcess().start()
@@ -43,56 +43,65 @@ try:
 	
 	while True:
 		ballDetected, ballCenter, queue = vp.read()
-		hsvatBallCenter, currentFPS = vp.readDebug()
-		print(ballDetected,ballCenter,currentFPS)
+		hsvatBallCenter, currentFPS, maxVal = vp.readDebug()
+		print(ballDetected,ballCenter,hsvatBallCenter, currentFPS,'fps','max=',maxVal)
 
-		if not quiet_mode and pi.momentary():
+		if not quiet_mode:
+			if pi.momentary():
 
-			if ballDetected:
+				if ballDetected is True:
 
-				if abs(ballCenter[0]) <= ballCenterPadding:
-					if args.go_straight:
-						motors.goStraight(60)
-				elif ballCenter[0] > 0:
-					motors.rotateCenter(direction=1,power=60)
-				elif ballCenter[0] < 0:
-					motors.rotateCenter(direction=-1,power=60)
-
-			elif args.out_of_frame:
-				
-				if queue[-1][0] > 0:
-					motors.rotateCenter(direction=1,power=60)
-				elif queue[-1][0] < 0:
-					motors.rotateCenter(direction=-1,power=60)
-
+					if abs(ballCenter[0]) <= ballCenterPadding:
+						if args.go_straight:
+							motors.goStraight(60)
+					elif ballCenter[0] > 0:
+						#motors.rotateCenter(direction=1,power=60)
+						motors.goRight(60)
+					elif ballCenter[0] < 0:
+						#motors.rotateCenter(direction=-1,power=60)
+						motors.goLeft(60)
+				elif args.out_of_frame:
+					if len(queue) != 0:
+						if queue[-1][0] > 0:
+							motors.rotateCenter(direction=1,power=60)
+							motors.goBR(60)
+						elif queue[-1][0] <= 0:
+							motors.rotateCenter(direction=-1,power=60)
+							motors.goBL(60)
+					else:
+						motors.rotateCenter(direction=1,power=60)
+				else:
+					motors.stop()
+			else:
+				motors.stop()
 
 		# DEBUG
 		if DEBUG_LEVEL > 0:
-            OutputFrames = vp.OutputFrame()
-            outlineCenter, outlineRadius = vp.minEnclosing()
+			OutputFrames = vp.OutputFrame()
+			outlineCenter, outlineRadius = vp.minEnclosing()
 
-            if OutputFrames[0] is not None:
-                CameraOutput = OutputFrames[0]
+			if OutputFrames[0] is not None:
+				CameraOutput = OutputFrames[0]
 
-                if ballCenter is not None and ballDetected:
-                    absoluteBallCenter = (ballCenter[0] + 160, ballCenter[1] + 120)
-                    cv.circle(CameraOutput, absoluteBallCenter, 4, (255,0,0), -1)	
-                    
-                cv.imshow('Camera', CameraOutput)
-            
-            if DEBUG_LEVEL > 1:
-                if OutputFrames[1] is not None:	
-                    cv.imshow('Grayscale Mask', OutputFrames[1])
-                if OutputFrames[2] is not None:
-                    cv.imshow('ballCenter mask', OutputFrames[2])
-                if OutputFrames[3] is not None:
-                    cv.imshow('hsv Mask', OutputFrames[3])
-            
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                break
-    
+				if ballCenter is not None and ballDetected:
+					absoluteBallCenter = (ballCenter[0] + 160, ballCenter[1] + 120)
+					cv.circle(CameraOutput, absoluteBallCenter, 4, (255,0,0), -1)	
+					
+				cv.imshow('Camera', CameraOutput)
+			
+			if DEBUG_LEVEL > 1:
+				if OutputFrames[1] is not None:	
+					cv.imshow('Grayscale Mask', OutputFrames[1])
+				if OutputFrames[2] is not None:
+					cv.imshow('ballCenter mask', OutputFrames[2])
+				if OutputFrames[3] is not None:
+					cv.imshow('hsv Mask', OutputFrames[3])
+			
+			if cv.waitKey(1) & 0xFF == ord('q'):
+				break
+	
 except KeyboardInterrupt:
-    print("Keyboard Interrupt")
+	print("Keyboard Interrupt")
 
 # do a bit of cleanup
 vp.stop()

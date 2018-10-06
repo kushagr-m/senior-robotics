@@ -17,6 +17,7 @@ class VisionProcess:
 		self.stopped = False
 		self.vs = None
 		self.rotateFrame = False
+		self.maxVal = None
 
 		self.frameCount = 0
 		self.fpsTime = time.perf_counter()
@@ -54,8 +55,9 @@ class VisionProcess:
 				time.sleep(2.0)
 				vs.read().any()
 				print('VisProc: PiCamera successful.')
-			except:
+			except Exception as e:
 				print('VisProc: PiCamera Failed.')
+				print(e)
 				#raise Exception('No camera found.')
 
 	def start(self):
@@ -83,8 +85,10 @@ class VisionProcess:
 			hsvH,hsvS,hsvV = cv.split(self.hsv)
 			self.ballGrayscale = cv.subtract(rgbR,rgbB)
 			
-			self.hsvMask = cv.bitwise_and(cv.inRange(hsvS,100,255),cv.inRange(hsvH,0,35))
+			self.hsvMask = cv.bitwise_and(cv.inRange(hsvS,100,255),cv.bitwise_or(cv.inRange(hsvH,0,4),cv.inRange(hsvH,175,180)))
 			maxVal = cv.minMaxLoc(self.ballGrayscale, self.hsvMask)[1]
+
+			ballCenterForCalcs = None
 
 			if maxVal >= 70:
 
@@ -112,7 +116,7 @@ class VisionProcess:
 					# 		pass
 
 					self.hsvatBallCenter = self.hsv[ballCenterForCalcs[1]][ballCenterForCalcs[0]]
-					if self.hsv[ballCenterForCalcs[1]][ballCenterForCalcs[0]][0] > 18: 
+					if self.hsvatBallCenter[0] > 5 and self.hsvatBallCenter[0] < 175: 
 						noBallDetected = True
 
 					if ballCenterForCalcs == (0,0): noBallDetected = True
@@ -134,6 +138,7 @@ class VisionProcess:
 				self.fpsTime = currentTime
 
 			self.noBallDetected = noBallDetected
+			if maxVal is not None: self.maxVal = maxVal
 	
 		print('VisProc: Stopped.')
 		self.vs.stop()
@@ -143,7 +148,7 @@ class VisionProcess:
 		return (not self.noBallDetected), self.relativeBallCenter, self.ballCenterQueue
 
 	def readDebug(self):
-		return self.hsvatBallCenter, self.currentFPS
+		return self.hsvatBallCenter, self.currentFPS, self.maxVal
 
 	def minEnclosing(self):
 		if self.outlineCenter and self.outlineRadius: return self.outlineCenter,self.outlineRadius

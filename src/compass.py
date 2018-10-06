@@ -1,57 +1,83 @@
 import smbus2 as smbus
 import math
+from hmc5883l import hmc5883l
+#from h2 import HMC5883L
 
-#some MPU6050 Registers and their Address
-Register_A     = 0              #Address of Configuration register A
-Register_B     = 0x01           #Address of configuration register B
-Register_mode  = 0x02           #Address of mode register
+declination = 11.62 #define declination angle of location where measurement going to be done
+pi          = 3.14159265359
 
-X_axis_H    = 0x03              #Address of X-axis MSB data register
-Z_axis_H    = 0x05              #Address of Z-axis MSB data register
-Y_axis_H    = 0x07              #Address of Y-axis MSB data register
-declination = 11.62             #define declination angle of location where measurement going to be done
-pi          = 3.14159265359     #define pi value
+compass = hmc5883l()
+# compass = HMC5883L(1)
 
-bus = smbus.SMBus(1) 	# or bus = smbus.SMBus(0) for older version boards
-Device_Address = 0x1e   # HMC5883L magnetometer device address
+xOffset = 0
+yOffset = 0
 
-def initialise():
-	# write to register 4
-	bus.write_byte_data(Device_Address, Register_A, 0x70)
-    #Write to Configuration Register B for gain
-	bus.write_byte_data(Device_Address, Register_B, 0xa0)
-    #Write to mode Register for selecting mode
-	bus.write_byte_data(Device_Address, Register_mode, 0)
-	return
+calibrationData = []
+isCalibrating = False
+def calibrateStart():
+    global isCalibrating
+    global calibrationData
 
-def readRaw(addr):
+    calibrationData = []
+    isCalibrating = True
 
-	#Read raw 16-bit value
-    high = bus.read_byte_data(Device_Address, addr)
-    low = bus.read_byte_data(Device_Address, addr+1)
+def calibrateStop():
+    global isCalibrating
+    global calibrationData
 
-    #concatenate higher and lower value
-    value = ((high << 8) | low)
+    isCalibrating = False
 
-    #to get signed value from module
-    if(value > 32768):
-        value = value - 65536
-    return value
+    minX = math.inf
+    minY = math.inf
+    maxX = -math.inf
+    maxY = -math.inf
 
-initialise()
+    for i in range(0, len(calibrationData)):
+        x, y, z = calibrationData[i]
+        if x < minX:
+            minX = x
+        if x > maxX:
+            maxX = x
+        if y < minY:
+            minY = y
+        if y > maxY:
+            maxY = y
+    
+    xOffset = (minX + maxX) / 2
+    yOffset = (minY + maxY) / 2
+    
+    calibrationData = []
 
+headingAngle = 0
 def readAngle():
-	x = readRaw(X_axis_H)
-	z = readRaw(Z_axis_H)
-	y = readRaw(Y_axis_H)
+    global headingAngle
+    return headingAngle
 
-	heading = math.atan2(y, x) + declination
+def loop():
+    global headingAngle
+    (x, y, z) = compass.axes()
+    # x = compass.get_field_x()
+    # y = compass.get_field_y()
+    # z = compass.get_field_z()
 
-	heading=heading%(2*pi)
+    if isCalibrating:
+        calibrationData.append((x, y, z))
 
-	#convert into angle
-	headingAngle = int(heading * 180/pi)
-	return headingAngle
+    #heading = math.atan2(x - xOffset, y - yOffset)
+    #heading = heading%(2*pi)
+    
+    heading = (90 - math.atan2(y, x) * 180/pi) if y > 0 else (270 - math.atan2(y, x) * 180/pi)
+    
+    #convert into angle
+    #headingAngle = (int(heading * 180/pi) + declination) % 360
+
+    return headingAngle
 
 #while True:
 #	print("Heading: " + str(readAngle()), flush=True)
+\
+
+if __name__ == "__main__":
+    while True:
+        currentHeading = loop()
+        print(currentHeading)

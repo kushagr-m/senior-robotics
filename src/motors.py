@@ -1,35 +1,27 @@
 import math
 from pymata_aio.pymata3 import PyMata3
 from pymata_aio.constants import Constants as PyMataConstants
-import platform
 
 # Motor pins
 motors = [
     (5, 4), # FL
     (3, 2), # FR
     (10, 9), # BL
-    (12, 11) # BR
+    (12, 11), # BR
+    (6, 7) # Dribbler
 ]
 
-current_power = [ 0, 0, 0, 0 ]
+current_power = [ 0, 0, 0, 0, 0 ]
 
 # board = PyMata3(com_port="/dev/ttyS0")
-board = PyMata3() if platform.system() == "Linux" else None
+board = PyMata3()
 
-# Stub when not running on the pi
-if platform.system() == "Linux":
-    # Set up motor output pins
-    for motor in motors:
-        board.set_pin_mode(motor[0], PyMataConstants.PWM)
-        board.set_pin_mode(motor[1], PyMataConstants.PWM)
-else:
-    print("Disabled motors")
+# Set up motor output pins
+for motor in motors:
+    board.set_pin_mode(motor[0], PyMataConstants.PWM)
+    board.set_pin_mode(motor[1], PyMataConstants.PWM)
 
 def set_motor(motor, power = 100):
-    # Stub when not running on the pi
-    if platform.system() != "Linux":
-        return
-    
     if current_power[motor] != power:
         current_power[motor] = power
         scaled_power = math.floor(abs(power) * 2.55)
@@ -54,11 +46,15 @@ def BL(power):
 def BR(power):
     set_motor(3, power)
 
+def Dribbler(power):
+    set_motor(4, power)
+
 def stop():
     FL(0)
     FR(0)
     BR(0)
     BL(0)
+    Dribbler(0)
 
 def goStraight(power = 100):
     FR(power)
