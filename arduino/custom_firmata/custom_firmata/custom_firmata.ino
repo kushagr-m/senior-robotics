@@ -26,13 +26,22 @@
 #include <Firmata.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_HMC5883_U.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_GFX.h>
 
 // the minimum interval for sampling analog input
 #define MINIMUM_SAMPLING_INTERVAL   1
+#define OLED_ADDR   0x3C
+
+Adafruit_SSD1306 display(-1);
+
+#if (SSD1306_LCDHEIGHT != 64)
+#error("Height incorrect, please fix Adafruit_SSD1306.h!");
+#endif
 
 /*==============================================================================
- * GLOBAL VARIABLES
- *============================================================================*/
+   GLOBAL VARIABLES
+  ============================================================================*/
 
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
@@ -90,13 +99,13 @@ void outputPort(byte portNumber, byte portValue, byte forceSend)
 }
 
 /* -----------------------------------------------------------------------------
- * check all the active digital inputs for change of state, then add any events
- * to the Serial output queue using Serial.print() */
+   check all the active digital inputs for change of state, then add any events
+   to the Serial output queue using Serial.print() */
 void checkDigitalInputs(void)
 {
   /* Using non-looping code allows constants to be given to readPort().
-   * The compiler will apply substantial optimizations if the inputs
-   * to readPort() are compile-time constants. */
+     The compiler will apply substantial optimizations if the inputs
+     to readPort() are compile-time constants. */
   if (TOTAL_PORTS > 0 && reportPINs[0]) outputPort(0, readPort(0, portConfigInputs[0]), false);
   if (TOTAL_PORTS > 1 && reportPINs[1]) outputPort(1, readPort(1, portConfigInputs[1]), false);
   if (TOTAL_PORTS > 2 && reportPINs[2]) outputPort(2, readPort(2, portConfigInputs[2]), false);
@@ -117,8 +126,8 @@ void checkDigitalInputs(void)
 
 // -----------------------------------------------------------------------------
 /* sets the pin mode to the correct state and sets the relevant bits in the
- * two bit-arrays that track Digital I/O and PWM status
- */
+   two bit-arrays that track Digital I/O and PWM status
+*/
 void setPinModeCallback(byte pin, int mode)
 {
   if (Firmata.getPinMode(pin) == PIN_MODE_IGNORE)
@@ -194,11 +203,11 @@ void setPinModeCallback(byte pin, int mode)
 }
 
 /*
- * Sets the value of an individual pin. Useful if you want to set a pin value but
- * are not tracking the digital port state.
- * Can only be used on pins configured as OUTPUT.
- * Cannot be used to enable pull-ups on Digital INPUT pins.
- */
+   Sets the value of an individual pin. Useful if you want to set a pin value but
+   are not tracking the digital port state.
+   Can only be used on pins configured as OUTPUT.
+   Cannot be used to enable pull-ups on Digital INPUT pins.
+*/
 void setPinValueCallback(byte pin, int value)
 {
   if (pin < TOTAL_PINS && IS_PIN_DIGITAL(pin)) {
@@ -259,7 +268,7 @@ void digitalWriteCallback(byte port, int value)
 
 // -----------------------------------------------------------------------------
 /* sets bits in a bit array (int) to toggle the reporting of the analogIns
- */
+*/
 //void FirmataClass::setAnalogPinReporting(byte pin, byte state) {
 //}
 void reportAnalogCallback(byte analogPin, int value)
@@ -300,8 +309,8 @@ void reportDigitalCallback(byte port, int value)
 }
 
 /*==============================================================================
- * SYSEX-BASED commands
- *============================================================================*/
+   SYSEX-BASED commands
+  ============================================================================*/
 
 void sysexCallback(byte command, byte argc, byte *argv)
 {
@@ -391,8 +400,8 @@ void sysexCallback(byte command, byte argc, byte *argv)
 }
 
 /*==============================================================================
- * SETUP()
- *============================================================================*/
+   SETUP()
+  ============================================================================*/
 
 void systemResetCallback()
 {
@@ -426,19 +435,39 @@ void systemResetCallback()
   analogInputsToReport = 0;
 
   /* send digital inputs to set the initial state on the host computer,
-   * since once in the loop(), this firmware will only send on change */
+     since once in the loop(), this firmware will only send on change */
   /*
-  TODO: this can never execute, since no pins default to digital input
+    TODO: this can never execute, since no pins default to digital input
         but it will be needed when/if we support EEPROM stored config
-  for (byte i=0; i < TOTAL_PORTS; i++) {
+    for (byte i=0; i < TOTAL_PORTS; i++) {
     outputPort(i, readPort(i, portConfigInputs[i]), true);
-  }
+    }
   */
   isResetting = false;
 }
 
 void setup()
 {
+  // initialize and clear display
+  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+  display.clearDisplay();
+  display.display();
+
+  // display a pixel in each corner of the screen
+  display.drawPixel(0, 0, WHITE);
+  display.drawPixel(127, 0, WHITE);
+  display.drawPixel(0, 63, WHITE);
+  display.drawPixel(127, 63, WHITE);
+
+  // display a line of text
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(1, 30);
+  display.print("Initialising...");
+
+  // update display with all of the above graphics
+  display.display();
+
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
   Firmata.attach(ANALOG_MESSAGE, analogWriteCallback);
@@ -464,22 +493,24 @@ void setup()
   systemResetCallback();  // reset to default config
 
   mag.begin();
+
   delay(500);
+  display.clearDisplay();
 }
 
 /*==============================================================================
- * LOOP()
- *============================================================================*/
+   LOOP()
+  ============================================================================*/
 void loop()
 {
   byte pin, analogPin;
 
   /* DIGITALREAD - as fast as possible, check for changes and output them to the
-   * FTDI buffer using Serial.print()  */
+     FTDI buffer using Serial.print()  */
   checkDigitalInputs();
 
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
-   * checking digital inputs.  */
+     checking digital inputs.  */
   while (Firmata.available())
     Firmata.processInput();
 
@@ -498,7 +529,15 @@ void loop()
         }
       }
     }
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(1, 30);
+    display.print("Bearing: ");
+    display.print(compass_val);
+    display.display();
   }
+
 
 #ifdef FIRMATA_SERIAL_FEATURE
   serialFeature.update();
