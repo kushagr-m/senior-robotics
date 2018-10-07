@@ -1,5 +1,6 @@
+# Nationals
 ## Roles and Responsibilities:
-- **John:** Schematic design, serial communication, wiring, compass
+- **John:** Schematic design, wiring, compass
 - **Elvis:** CAD, hardware construction
 - **Leon:** Component digitisation, hardware construction, strategy
 - **Ben:** Hardware construction, component digitisation
@@ -16,14 +17,14 @@
 
 ## Competition Times
 ### Saturday 06/10
-- 11:10 Table 12 vs Legolas (Camden Haven High School)
-- 12:10 Table 11 vs InfraReady (Private)
-- 2:10 Table 12 vs Undecided (Camden Haven High School)
-- 3:50 Table 12 vs Ambusch (Camden Haven High School)
+- 11:10 Table 12 vs Legolas (Camden Haven High School) - _DRAW (0-0)_
+- 12:10 Table 11 vs InfraReady (Private entry) - _LOSS (0-10)_
+- 2:10 Table 12 vs Undecided (Camden Haven High School) - _DRAW (0-0)_
+- 3:50 Table 12 vs Ambusch (Camden Haven High School) - _LOSS (0-?)_
 ### Sunday 07/10
-- 10:00 Table 12 vs H010n0m1c (?)
-- 11:00 Table 12 vs M108 (The Scots College)
-- 11:40 Table 12 vs Team APEX (Brisbane Boys College)
+- 10:00 Table 12 vs H010n0m1c (Private entry) - _LOSS (0-10)_
+- 11:00 Table 12 vs M108 (The Scots College) - _LOSS (1-11)_
+- 11:40 Table 12 vs Team APEX (Brisbane Boys College) - _LOSS (0-10)_
 
 ## Links
 - **[VS Code](https://www.google.com)**: Live collaboration of code for Raspberry Pi and Arduino
@@ -31,3 +32,5 @@
 
 
 A note from our sponsors: _Congratulations on being runner up in the state competition, and now entering the national robotics competition!_
+
+A second note from our sponsors: _Thanks for participating, here's a participation reward lmao 💩_
