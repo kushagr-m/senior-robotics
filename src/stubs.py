@@ -4,18 +4,11 @@ class Compass:
     def heading(self):
         return 0
     def difference(a, b, direction=1):
-        if direction == 1:
-            # Turning clockwise
-            if b > a:
-                return b - a
-            else:
-                return 360 - a + b
-        else:
-            # Turning anticlockwise
-            if b < a:
-                return a - b
-            else:
-                return 360 - b + a
+        return 0
+    def calibrate():
+        pass
+    def calibratedHeading():
+        return 0
 compass = Compass()
 
 class Pi:
@@ -71,6 +64,9 @@ class Motors:
         pass
 
     def rotateFrAxis(self, direction = -1, power = 100):
+        pass
+
+    def reverse(self):
         pass
             
     def cleanup(self):

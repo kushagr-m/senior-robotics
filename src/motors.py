@@ -59,32 +59,32 @@ def stop():
 def goStraight(power = 100):
     FR(power)
     FL(-1*power)
-    # BR(power)
-    BR(0)
-    # BL(-1*power)
-    BL(0)
+    BR(power)
+    #BR(0)
+    BL(-1*power)
+    #BL(0)
 
 def goLeft(power = 100):
-    # FR(power)
-    FR(0)
+    FR(power)
+    #FR(0)
     FL(power)
-    # BR(-1*power)
-    BR(0)
+    BR(-1*power)
+    #BR(0)
     BL(-1*power)
 
 def goRight(power = 100):
     FR(-1*power)
-    # FL(-1*power)
-    FL(0)
+    FL(-1*power)
+    #FL(0)
     BR(power)
-    # BL(power)
-    BL(0)
+    BL(power)
+    #BL(0)
 
 def goBack(power = 100):
-    # FR(-1*power)
-    FR(0)
-    # FL(power)
-    FL(0)
+    FR(-1*power)
+    #FR(0)
+    FL(power)
+    #FL(0)
     BR(-1*power)
     BL(power)
 
@@ -114,19 +114,19 @@ def goBL(power = 100):
 
 def rotateCenter(direction = -1, power = 100):
     if direction < 0:
-        # FR(power)
+        #FR(power)
         FR(0)
         FL(power)
         BR(power)
-        # BL(power)
+        #BL(power)
         BL(0)
 
     if direction > 0:
-        # FR(-1*power)
+        #FR(-1*power)
         FR(0)
         FL(-1*power)
         BR(-1*power)
-        # BL(-1*power)
+        #BL(-1*power)
         BL(0)
 
 def rotateFrAxis(direction = -1, power = 100):
@@ -142,6 +142,11 @@ def rotateFrAxis(direction = -1, power = 100):
         BR(power)
         BL(power)
         
+def reverse():
+    for i in range(0, len(current_power)):
+        set_motor(i, -current_power[i])
+
+
 def cleanup():
     stop()
 

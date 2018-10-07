@@ -14,6 +14,7 @@ class VisionProcess:
 		self.frameDimensions = (320,240) # set frame dimensions
 
 		# initialise variables
+		self.ballArea = 0
 		self.stopped = False
 		self.vs = None
 		self.rotateFrame = False
@@ -98,6 +99,7 @@ class VisionProcess:
 
 				#self.ballMask = cv.dilate(self.ballMask,cv.getStructuringElement(cv.MORPH_ELLIPSE,(17,17)))
 				moments = cv.moments(self.ballMask)
+				self.ballArea = moments['m00']
 				if moments:
 					if moments["m00"]<=0: ballCenterForCalcs = int(moments["m10"]),int(moments["m01"])
 					else: ballCenterForCalcs = int(moments["m10"] / moments["m00"]), int(moments["m01"] / moments["m00"])
@@ -145,7 +147,7 @@ class VisionProcess:
 		return
 
 	def read(self):
-		return (not self.noBallDetected), self.relativeBallCenter, self.ballCenterQueue
+		return (not self.noBallDetected), self.relativeBallCenter, self.ballCenterQueue, self.ballArea
 
 	def readDebug(self):
 		return self.hsvatBallCenter, self.currentFPS, self.maxVal
